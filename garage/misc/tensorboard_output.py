@@ -13,9 +13,10 @@ from tensorboard.plugins.custom_scalar import metadata
 import tensorflow as tf
 
 from garage.misc.console import mkdir_p
+from garage.misc.logger_outputs import LoggerOutput
 
 
-class TensorBoardOutput:
+class TensorBoardOutput(LoggerOutput):
     def __init__(self):
         self._scalars = tf.Summary()
         self._scope_tensor = {}

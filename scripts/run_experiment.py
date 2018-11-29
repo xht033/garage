@@ -152,7 +152,7 @@ def run_experiment(argv):
     if args.variant_data is not None:
         variant_data = pickle.loads(base64.b64decode(args.variant_data))
         variant_log_file = osp.join(log_dir, args.variant_log_file)
-        logger.log_variant(variant_log_file, variant_data)
+        logger.dump_variant(variant_log_file, variant_data)
     else:
         variant_data = None
 
