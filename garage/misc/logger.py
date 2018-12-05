@@ -70,6 +70,9 @@ class TabularInput(object):
         finally:
             self.pop_tabular_prefix()
 
+    def clear(self):
+        self._tabular.clear()
+
     def push_tabular_prefix(self, key):
         self._tabular_prefixes.append(key)
         self._tabular_prefix_str = ''.join(self._tabular_prefixes)
