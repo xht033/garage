@@ -3,11 +3,9 @@ import datetime
 import os
 import sys
 from abc import ABC, abstractmethod
-from os import path as osp
 
 import dateutil.tz
 
-from garage import config
 from garage.misc.console import colorize
 from garage.misc.logger import TabularInput, mkdir_p
 
@@ -19,6 +17,9 @@ class LoggerOutput(ABC):
 
 
 class StdOutput(LoggerOutput):
+    def __init__(self):
+        self.accept_types = (str, TabularInput)
+
     def log(self, data, prefix='', with_timestamp=True, color=None):
         out = ''
         if isinstance(data, str):
@@ -38,14 +39,16 @@ class StdOutput(LoggerOutput):
 
 class TextOutput(LoggerOutput):
     def __init__(self, file_name):
-        text_log_file = osp.join(config.LOG_DIR, file_name)
-        mkdir_p(os.path.dirname(text_log_file))
-        self._text_log_file = text_log_file
-        self._log_file = open(text_log_file, 'a')
+        self.accept_types = (str, )
+
+        mkdir_p(os.path.dirname(file_name))
+        self._text_log_file = file_name
+        self._log_file = open(file_name, 'a')
 
     def log(self, data, prefix='', with_timestamp=True, color=None):
-        if not isinstance(data, str):
+        if not isinstance(data, self.accept_types):
             return
+
         out = data
         if with_timestamp:
             now = datetime.datetime.now(dateutil.tz.tzlocal())
@@ -58,15 +61,16 @@ class TextOutput(LoggerOutput):
 
 class CsvOutput(LoggerOutput):
     def __init__(self, file_name):
-        csv_log_file = osp.join(config.LOG_DIR, file_name)
-        mkdir_p(os.path.dirname(csv_log_file))
-        self._csv_log_file = csv_log_file
-        self._log_file = open(csv_log_file, 'w')
+        self.accept_types = (TabularInput, )
+
+        mkdir_p(os.path.dirname(file_name))
+        self._csv_log_file = file_name
+        self._log_file = open(file_name, 'w')
 
         self._tabular_header_written = False
 
     def log(self, data, prefix='', with_timestamp=True, color=None):
-        if not isinstance(data, TabularInput):
+        if not isinstance(data, self.accept_types):
             return
 
         writer = csv.DictWriter(

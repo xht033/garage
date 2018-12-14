@@ -12,16 +12,18 @@ import dateutil.tz
 import joblib
 import psutil
 
+from garage.misc.logger.logger_outputs import TextOutput, CsvOutput
+from garage.misc.logger import logger
+import garage.misc.logger.logger_utils as logger_utils
+import garage.plotter
+import garage.tf.plotter
 from garage import config
 from garage.experiment.experiment import concretize
 from garage.misc.console import colorize
 from garage.misc.ext import is_iterable
 from garage.misc.ext import set_seed
-import garage.misc.logger as logger
-import garage.plotter
 from garage.sampler import parallel_sampler
 from garage.sampler.utils import mask_signals
-import garage.tf.plotter
 
 
 def run_experiment(argv):
@@ -78,7 +80,7 @@ def run_experiment(argv):
         '--tensorboard_step_key',
         type=str,
         default=None,
-        help=("Name of the step key in tensorboard_summary."))
+        help="Name of the step key in tensorboard_summary.")
     parser.add_argument(
         '--params_log_file',
         type=str,
@@ -152,15 +154,15 @@ def run_experiment(argv):
     if args.variant_data is not None:
         variant_data = pickle.loads(base64.b64decode(args.variant_data))
         variant_log_file = osp.join(log_dir, args.variant_log_file)
-        logger.dump_variant(variant_log_file, variant_data)
+        logger_utils.dump_variant(variant_log_file, variant_data)
     else:
         variant_data = None
 
     if not args.use_cloudpickle:
-        logger.log_parameters_lite(params_log_file, args)
+        logger_utils.log_parameters_lite(params_log_file, args)
 
-    logger.add_text_output(text_log_file)
-    logger.add_tabular_output(tabular_log_file)
+    logger.add_output(TextOutput(text_log_file))
+    logger.add_output(CsvOutput(tabular_log_file))
     logger.set_tensorboard_dir(log_dir)
     prev_snapshot_dir = logger.get_snapshot_dir()
     prev_mode = logger.get_snapshot_mode()

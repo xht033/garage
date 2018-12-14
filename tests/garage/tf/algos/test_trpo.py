@@ -5,9 +5,9 @@ too low.
 import gym
 import tensorflow as tf
 
-from garage.envs import normalize
 import garage.misc.logger as logger
-from garage.misc.tensorboard_output import TensorBoardOutput
+from garage.envs import normalize
+from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.tf.algos import TRPO
 from garage.tf.baselines import GaussianMLPBaseline
 from garage.tf.envs import TfEnv

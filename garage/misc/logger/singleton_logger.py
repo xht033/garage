@@ -1,37 +1,56 @@
-import json
-import os
 from contextlib import contextmanager
-from enum import Enum
 
 import numpy as np
 
-from garage.misc.console import mkdir_p
 from garage.misc.tabulate import tabulate
 
 
-def dump_variant(log_file, variant_data):
-    mkdir_p(os.path.dirname(log_file))
-    with open(log_file, "w") as f:
-        json.dump(variant_data, f, indent=2, sort_keys=True, cls=MyEncoder)
+class Logger(object):
+    def __init__(self):
+        self._outputs = []
+        self._prefixes = []
+        self._prefix_str = ''
 
+    def log(self, data, with_prefix=True, with_timestamp=True, color=None):
+        prefix = ''
+        if with_prefix:
+            prefix = self._prefix_str
 
-class MyEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, type):
-            return {'$class': o.__module__ + "." + o.__name__}
-        elif isinstance(o, Enum):
-            return {
-                '$enum':
-                o.__module__ + "." + o.__class__.__name__ + '.' + o.name
-            }
-        elif callable(o):
-            return {'$function': o.__module__ + "." + o.__name__}
-        return json.JSONEncoder.default(self, o)
+        for output in self._outputs:
+            if isinstance(data, output.accept_types):
+                output.log(
+                    data,
+                    prefix=prefix,
+                    with_timestamp=with_timestamp,
+                    color=color)
+
+    def add_output(self, output):
+        self._outputs.append(output)
+
+    def reset_output(self):
+        self._outputs.clear()
+
+    @contextmanager
+    def prefix(self, key):
+        self.push_prefix(key)
+        try:
+            yield
+        finally:
+            self.pop_prefix()
+
+    def push_prefix(self, prefix):
+        self._prefixes.append(prefix)
+        self._prefix_str = ''.join(self._prefixes)
+
+    def pop_prefix(self):
+        del self._prefixes[-1]
+        self._prefix_str = ''.join(self._prefixes)
 
 
 class TabularInput(object):
     def __init__(self):
         self._tabular = []
+        self._no_prefix_dict = {}
         self._tabular_prefixes = []
         self._tabular_prefix_str = ''
 
@@ -40,6 +59,7 @@ class TabularInput(object):
 
     def record_tabular(self, key, val):
         self._tabular.append((self._tabular_prefix_str + str(key), str(val)))
+        self._no_prefix_dict[key] = val
 
     def record_tabular_misc_stat(self, key, values, placement='back'):
         if placement == 'front':
@@ -84,48 +104,8 @@ class TabularInput(object):
     def get_table_dict(self):
         return dict(self._tabular)
 
+    def get_no_prefix_dict(self):
+        return self._no_prefix_dict
+
     def get_table_key_set(self):
         return set(dict(self._tabular).keys())
-
-
-class Logger(object):
-    def __init__(self):
-        self._outputs = []
-        self._prefixes = []
-        self._prefix_str = ''
-
-    def log(self, data, with_prefix=True, with_timestamp=True, color=None):
-        prefix = ''
-        if with_prefix:
-            prefix = self._prefix_str
-        for output in self._outputs:
-            output.log(
-                data,
-                prefix=prefix,
-                with_timestamp=with_timestamp,
-                color=color)
-
-    def add_output(self, output):
-        self._outputs.append(output)
-
-    def reset_output(self):
-        self._outputs.clear()
-
-    @contextmanager
-    def prefix(self, key):
-        self.push_prefix(key)
-        try:
-            yield
-        finally:
-            self.pop_prefix()
-
-    def push_prefix(self, prefix):
-        self._prefixes.append(prefix)
-        self._prefix_str = ''.join(self._prefixes)
-
-    def pop_prefix(self):
-        del self._prefixes[-1]
-        self._prefix_str = ''.join(self._prefixes)
-
-
-logger = Logger()

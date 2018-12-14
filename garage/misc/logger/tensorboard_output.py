@@ -1,23 +1,26 @@
+import shutil
 from os.path import abspath
 from os.path import dirname
-import shutil
 
 import google.protobuf.json_format as json_format
-from jsonmerge import merge
 import numpy as np
+import tensorflow as tf
+from jsonmerge import merge
 from tensorboard import summary as summary_lib
 from tensorboard.backend.event_processing import plugin_event_multiplexer \
     as event_multiplexer
 from tensorboard.plugins.custom_scalar import layout_pb2
 from tensorboard.plugins.custom_scalar import metadata
-import tensorflow as tf
 
 from garage.misc.console import mkdir_p
-from garage.misc.logger_outputs import LoggerOutput
+from garage.misc.logger import TabularInput
+from garage.misc.logger.logger_outputs import LoggerOutput
 
 
 class TensorBoardOutput(LoggerOutput):
-    def __init__(self):
+    def __init__(self, log_dir):
+        self.accept_types = (tf.Tensor, TabularInput)
+
         self._scalars = tf.Summary()
         self._scope_tensor = {}
         self._has_recorded_tensor = False
@@ -35,6 +38,12 @@ class TensorBoardOutput(LoggerOutput):
         self._writer_dir = None
         self._layout_writer = None
         self._layout_writer_dir = None
+
+    def log(self, data, prefix='', with_timestamp=True, color=None):
+        if isinstance(data, tf.Tensor):
+            self.record_tensor(data.name, data)
+        elif isinstance(data, TabularInput):
+            self.record_scalar()
 
     def set_dir(self, dir_name):
         if not dir_name:

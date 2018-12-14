@@ -1,12 +1,12 @@
 import gc
 import unittest
 
-from dm_control.suite import ALL_TASKS
 import tensorflow as tf
+from dm_control.suite import ALL_TASKS
 
-from garage.envs.dm_control import DmControlEnv
 import garage.misc.logger as logger
-from garage.misc.tensorboard_output import TensorBoardOutput
+from garage.envs.dm_control import DmControlEnv
+from garage.misc.logger.tensorboard_output import TensorBoardOutput
 
 
 class TfTestCase(unittest.TestCase):

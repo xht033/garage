@@ -6,7 +6,7 @@ import gym
 import tensorflow as tf
 
 import garage.misc.logger as logger
-from garage.misc.tensorboard_output import TensorBoardOutput
+from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.replay_buffer import SimpleReplayBuffer
 from garage.tf.algos import DDPG
 from garage.tf.envs import TfEnv
