@@ -31,8 +31,6 @@ def colorize(string, color, bold=False, highlight=False):
 
 
 def mkdir_p(path):
-    if not path:
-        return
     try:
         os.makedirs(path)
     except OSError as exc:  # Python >2.5
