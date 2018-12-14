@@ -68,6 +68,7 @@ $(cat .gitignore)
 # Error codes applied to added files
 ignored_errors_added=(
 D107  # missing docstring in __init__
+D401  # First line should be in imperative mood
 W503  # line break before binary operator
 )
 

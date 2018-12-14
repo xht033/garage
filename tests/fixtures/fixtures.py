@@ -1,3 +1,4 @@
+# flake8: noqa
 import gc
 import unittest
 
@@ -7,6 +8,7 @@ import tensorflow as tf
 from garage.envs.dm_control import DmControlEnv
 from garage.misc import ext
 import garage.misc.logger as logger
+from garage.misc.logger.tensorboard_output import TensorBoardOutput
 
 
 class TfTestCase(unittest.TestCase):
@@ -25,7 +27,7 @@ class TfGraphTestCase(unittest.TestCase):
         self.graph = tf.Graph()
         self.sess = tf.Session(graph=self.graph)
         self.sess.__enter__()
-        logger.reset()
+        logger.reset_output(TensorBoardOutput())
         ext.set_seed(1)
 
     def tearDown(self):

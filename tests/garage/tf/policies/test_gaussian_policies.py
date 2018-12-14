@@ -1,13 +1,15 @@
+# flake8: noqa
 """
 This script creates a unittest that tests Gaussian policies in
 garage.tf.policies.
 """
 from nose2 import tools
 
+import garage.misc.logger as logger
 from garage.baselines import LinearFeatureBaseline
 from garage.envs import normalize
 from garage.envs.box2d import CartpoleEnv
-import garage.misc.logger as logger
+from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.tf.algos import TRPO
 from garage.tf.envs import TfEnv
 from garage.tf.optimizers import ConjugateGradientOptimizer
@@ -23,7 +25,7 @@ policies = [GaussianGRUPolicy, GaussianLSTMPolicy, GaussianMLPPolicy]
 class TestGaussianPolicies(TfGraphTestCase):
     @tools.params(*policies)
     def test_gaussian_policies(self, policy_cls):
-        logger.reset()
+        logger._tensorboard = TensorBoardOutput()
         env = TfEnv(normalize(CartpoleEnv()))
 
         policy = policy_cls(name="policy", env_spec=env.spec)

@@ -7,6 +7,7 @@ import tensorflow as tf
 
 from garage.envs import normalize
 import garage.misc.logger as logger
+from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.tf.algos import NPO
 from garage.tf.baselines import GaussianMLPBaseline
 from garage.tf.envs import TfEnv
@@ -17,7 +18,7 @@ from tests.fixtures import TfGraphTestCase
 class TestNPO(TfGraphTestCase):
     def test_npo_pendulum(self):
         """Test NPO with Pendulum environment."""
-        logger.reset()
+        logger.reset_output(TensorBoardOutput())
         env = TfEnv(normalize(gym.make("InvertedDoublePendulum-v2")))
         policy = GaussianMLPPolicy(
             env_spec=env.spec,
@@ -46,7 +47,7 @@ class TestNPO(TfGraphTestCase):
 
     def test_npo_unknown_pg_loss(self):
         """Test NPO with unkown policy gradient loss."""
-        logger.reset()
+        logger.reset_output(TensorBoardOutput())
         env = TfEnv(normalize(gym.make("InvertedDoublePendulum-v2")))
         policy = GaussianMLPPolicy(
             env_spec=env.spec,

@@ -2,6 +2,7 @@
 import pyprind
 
 from garage.misc import logger
+from garage.misc.logger.logger_outputs import StdOutput
 
 
 class ProgBarCounter:
@@ -13,14 +14,14 @@ class ProgBarCounter:
         self.max_progress = 1000000
         self.cur_progress = 0
         self.cur_count = 0
-        if not logger.get_log_tabular_only():
+        if logger.has_output(StdOutput):
             self.pbar = pyprind.ProgBar(self.max_progress)
         else:
             self.pbar = None
 
     def inc(self, increment):
         """Increment function."""
-        if not logger.get_log_tabular_only():
+        if logger.has_output(StdOutput):
             self.cur_count += increment
             new_progress = (
                 self.cur_count * self.max_progress / self.total_count)

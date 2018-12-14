@@ -1,6 +1,4 @@
-# flake8: noqa
-from os.path import abspath
-from os.path import dirname
+from os.path import abspath, dirname
 import shutil
 
 import google.protobuf.json_format as json_format
@@ -9,15 +7,18 @@ import numpy as np
 from tensorboard import summary as summary_lib
 from tensorboard.backend.event_processing import plugin_event_multiplexer \
     as event_multiplexer
-from tensorboard.plugins.custom_scalar import layout_pb2
-from tensorboard.plugins.custom_scalar import metadata
+from tensorboard.plugins.custom_scalar import layout_pb2, metadata
 import tensorflow as tf
 
 from garage.misc.console import mkdir_p
+from garage.misc.logger import TabularInput
+from garage.misc.logger.logger_outputs import LoggerOutput
 
 
-class TensorBoardOutput:
-    def __init__(self):
+class TensorBoardOutput(LoggerOutput):
+    def __init__(self, log_dir):
+        self.accept_types = (tf.Tensor, TabularInput)
+
         self._scalars = tf.Summary()
         self._scope_tensor = {}
         self._has_recorded_tensor = False
@@ -35,6 +36,13 @@ class TensorBoardOutput:
         self._writer_dir = None
         self._layout_writer = None
         self._layout_writer_dir = None
+
+    def log(self, data, prefix='', with_timestamp=True, color=None):
+        if isinstance(data, tf.Tensor):
+            self.record_tensor(data.name, data)
+        elif isinstance(data, TabularInput):
+            for key, value in data.get_table_dict().items():
+                self.record_scalar(key, value)
 
     def set_dir(self, dir_name):
         if not dir_name:

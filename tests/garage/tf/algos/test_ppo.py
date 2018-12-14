@@ -1,3 +1,4 @@
+# flake8: noqa
 """
 This script creates a test that fails when garage.tf.algos.PPO performance is
 too low.
@@ -5,8 +6,9 @@ too low.
 import gym
 import tensorflow as tf
 
-from garage.envs import normalize
 import garage.misc.logger as logger
+from garage.envs import normalize
+from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.tf.algos import PPO
 from garage.tf.baselines import GaussianMLPBaseline
 from garage.tf.envs import TfEnv
@@ -18,7 +20,7 @@ from tests.fixtures import TfGraphTestCase
 class TestPPO(TfGraphTestCase):
     def test_ppo_pendulum(self):
         """Test PPO with Pendulum environment."""
-        logger.reset()
+        logger.reset_output(TensorBoardOutput())
         env = TfEnv(normalize(gym.make("InvertedDoublePendulum-v2")))
         policy = GaussianMLPPolicy(
             env_spec=env.spec,
@@ -47,7 +49,7 @@ class TestPPO(TfGraphTestCase):
 
     def test_ppo_pendulum_recurrent(self):
         """Test PPO with Pendulum environment and recurrent policy."""
-        logger.reset()
+        logger.reset_output(TensorBoardOutput())
         env = TfEnv(normalize(gym.make("InvertedDoublePendulum-v2")))
         policy = GaussianLSTMPolicy(env_spec=env.spec, )
         baseline = GaussianMLPBaseline(

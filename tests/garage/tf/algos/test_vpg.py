@@ -6,6 +6,7 @@ from garage.baselines import LinearFeatureBaseline
 from garage.envs import normalize
 from garage.envs.box2d import CartpoleEnv
 import garage.misc.logger as logger
+from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.tf.algos import VPG
 from garage.tf.envs import TfEnv
 from garage.tf.policies import GaussianMLPPolicy
@@ -15,7 +16,7 @@ from tests.fixtures import TfGraphTestCase
 class TestVPG(TfGraphTestCase):
     def test_vpg_cartpole(self):
         """Test VPG with Cartpole environment."""
-        logger.reset()
+        logger._tensorboard = TensorBoardOutput()
         env = TfEnv(normalize(CartpoleEnv()))
 
         policy = GaussianMLPPolicy(

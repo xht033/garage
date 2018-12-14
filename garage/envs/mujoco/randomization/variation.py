@@ -1,7 +1,8 @@
+# flake8: noqa
 from enum import Enum
 
-from lxml import etree
 import numpy as np
+from lxml import etree
 
 
 class Method(Enum):
