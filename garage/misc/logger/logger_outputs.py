@@ -6,8 +6,8 @@ from abc import ABC, abstractmethod
 
 import dateutil.tz
 
-from garage.misc.console import colorize
-from garage.misc.logger import TabularInput, mkdir_p
+from garage.misc.console import colorize, mkdir_p
+from garage.misc.logger import TabularInput
 
 
 class LoggerOutput(ABC):
