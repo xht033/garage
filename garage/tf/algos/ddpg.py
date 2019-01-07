@@ -16,7 +16,6 @@ import tensorflow.contrib as tc
 import garage.misc.logger as logger
 from garage.misc.overrides import overrides
 from garage.tf.algos.off_policy_rl_algorithm import OffPolicyRLAlgorithm
-from garage.tf.misc import tensor_utils
 
 
 class DDPG(OffPolicyRLAlgorithm):
@@ -78,7 +77,8 @@ class DDPG(OffPolicyRLAlgorithm):
         self.clip_pos_returns = clip_pos_returns
         self.clip_return = clip_return
         self.success_history = deque(maxlen=100)
-        super(DDPG, self).__init__(
+
+        super().__init__(
             env=env,
             replay_buffer=replay_buffer,
             use_target=True,
@@ -89,10 +89,10 @@ class DDPG(OffPolicyRLAlgorithm):
     def init_opt(self):
         with tf.name_scope(self.name, "DDPG"):
             # Create target policy and qf network
-            self.target_policy_f_prob_online, _, _ = self.policy.build_net(
-                trainable=False, name="target_policy")
-            self.target_qf_f_prob_online, _, _, _ = self.qf.build_net(
-                trainable=False, name="target_qf")
+            self.target_policy_f_prob_online, self._target_policy_obs_ph = self.policy.build_net(  # noqa: E501
+                name="target_policy")
+            self.target_qf_q_val, self._target_qf_obs_ph, self._target_qf_act_ph = self.qf.build_net(  # noqa: E501
+                name="target_qf")
 
             # Set up target init and update function
             with tf.name_scope("setup_target"):
@@ -105,51 +105,35 @@ class DDPG(OffPolicyRLAlgorithm):
                 target_init_op = policy_init_ops + qf_init_ops
                 target_update_op = policy_update_ops + qf_update_ops
 
-            f_init_target = tensor_utils.compile_function(
-                inputs=[], outputs=target_init_op)
-            f_update_target = tensor_utils.compile_function(
-                inputs=[], outputs=target_update_op)
-
-            with tf.name_scope("inputs"):
-                if self.input_include_goal:
-                    obs_dim = self.env.observation_space.flat_dim_with_keys(
-                        ["observation", "desired_goal"])
-                else:
-                    obs_dim = self.env.observation_space.flat_dim
-                y = tf.placeholder(tf.float32, shape=(None, 1), name="input_y")
-                obs = tf.placeholder(
-                    tf.float32,
-                    shape=(None, obs_dim),
-                    name="input_observation")
-                actions = tf.placeholder(
-                    tf.float32,
-                    shape=(None, self.env.action_space.flat_dim),
-                    name="input_action")
+            self.f_init_target = target_init_op
+            self.f_update_target = target_update_op
 
             # Set up policy training function
-            next_action = self.policy.get_action_sym(obs, name="policy_action")
-            next_qval = self.qf.get_qval_sym(
-                obs, next_action, name="policy_action_qval")
+            # reuse the qf using action from policy
+            self.policy_qf = self.qf.get_qval_sym((self.policy.obs_ph,
+                                                   self.policy.f_prob))
+
             with tf.name_scope("action_loss"):
-                action_loss = -tf.reduce_mean(next_qval)
+                action_loss = -tf.reduce_mean(self.policy_qf)
                 if self.policy_weight_decay > 0.:
                     policy_reg = tc.layers.apply_regularization(
                         tc.layers.l2_regularizer(self.policy_weight_decay),
                         weights_list=self.policy.get_regularizable_vars())
                     action_loss += policy_reg
-
             with tf.name_scope("minimize_action_loss"):
                 policy_train_op = self.policy_optimizer(
                     self.policy_lr, name="PolicyOptimizer").minimize(
                         action_loss, var_list=self.policy.get_trainable_vars())
 
-            f_train_policy = tensor_utils.compile_function(
-                inputs=[obs], outputs=[policy_train_op, action_loss])
+            self.f_train_policy = policy_train_op, action_loss
 
             # Set up qf training function
-            qval = self.qf.get_qval_sym(obs, actions, name="q_value")
+            self.y = tf.placeholder(
+                tf.float32, shape=(None, 1), name="input_y")
+
             with tf.name_scope("qval_loss"):
-                qval_loss = tf.reduce_mean(tf.squared_difference(y, qval))
+                qval_loss = tf.reduce_mean(
+                    tf.squared_difference(self.y, self.qf.q_val))
                 if self.qf_weight_decay > 0.:
                     qf_reg = tc.layers.apply_regularization(
                         tc.layers.l2_regularizer(self.qf_weight_decay),
@@ -161,27 +145,20 @@ class DDPG(OffPolicyRLAlgorithm):
                     self.qf_lr, name="QFunctionOptimizer").minimize(
                         qval_loss, var_list=self.qf.get_trainable_vars())
 
-            f_train_qf = tensor_utils.compile_function(
-                inputs=[y, obs, actions],
-                outputs=[qf_train_op, qval_loss, qval])
-
-            self.f_train_policy = f_train_policy
-            self.f_train_qf = f_train_qf
-            self.f_init_target = f_init_target
-            self.f_update_target = f_update_target
+            self.f_train_qf = qf_train_op, qval_loss, self.qf.q_val
 
     @overrides
     def train(self, sess=None):
         created_session = True if (sess is None) else False
         if sess is None:
-            sess = tf.Session()
-            sess.__enter__()
+            self.sess = tf.Session()
+            self.sess.__enter__()
 
-        sess.run(tf.global_variables_initializer())
-        self.start_worker(sess)
+        self.sess.run(tf.global_variables_initializer())
+        self.start_worker(self.sess)
 
         if self.use_target:
-            self.f_init_target()
+            self.sess.run(self.f_init_target, feed_dict=dict())
 
         episode_rewards = []
         episode_policy_losses = []
@@ -257,7 +234,7 @@ class DDPG(OffPolicyRLAlgorithm):
 
         self.shutdown_worker()
         if created_session:
-            sess.close()
+            self.sess.close()
         return last_average_return
 
     @overrides
@@ -290,9 +267,15 @@ class DDPG(OffPolicyRLAlgorithm):
             next_inputs = next_observations
             inputs = observations
 
-        target_actions = self.target_policy_f_prob_online(next_inputs)
-        target_qvals = self.target_qf_f_prob_online(next_inputs,
-                                                    target_actions)
+        target_actions = self.sess.run(
+            self.target_policy_f_prob_online,
+            feed_dict={self._target_policy_obs_ph: next_inputs})
+        target_qvals = self.sess.run(
+            self.target_qf_q_val,
+            feed_dict={
+                self._target_qf_obs_ph: next_inputs,
+                self._target_qf_act_ph: target_actions
+            })
 
         clip_range = (-self.clip_return, 0.
                       if self.clip_pos_returns else self.clip_return)
@@ -300,10 +283,18 @@ class DDPG(OffPolicyRLAlgorithm):
             rewards + (1.0 - terminals) * self.discount * target_qvals,
             clip_range[0], clip_range[1])
 
-        _, qval_loss, qval = self.f_train_qf(ys, inputs, actions)
-        _, action_loss = self.f_train_policy(inputs)
+        _, qval_loss, qval = self.sess.run(
+            self.f_train_qf,
+            feed_dict={
+                self.y: ys,
+                self.qf.obs_ph: inputs,
+                self.qf.act_ph: actions
+            })
 
-        self.f_update_target()
+        _, action_loss = self.sess.run(
+            self.f_train_policy, feed_dict={self.policy.obs_ph: inputs})
+
+        self.sess.run(self.f_update_target, feed_dict=dict())
 
         return qval_loss, ys, qval, action_loss
 

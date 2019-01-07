@@ -81,7 +81,8 @@ class OUStrategy(ExplorationStrategy):
         return np.clip(action + ou_state, self.action_space.low,
                        self.action_space.high), agent_infos
 
-    def get_actions(self, observations, policy):
+    @overrides
+    def get_actions(self, t, observations, policy, **kwargs):
         actions, agent_infos = policy.get_actions(observations)
         ou_state = self.simulate()
         return np.clip(actions + ou_state, self.action_space.low,

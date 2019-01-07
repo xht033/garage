@@ -9,15 +9,12 @@ import tensorflow as tf
 
 from garage.core import Serializable
 from garage.misc.overrides import overrides
-from garage.tf.core import layers as layers
-from garage.tf.core import LayersPowered
-from garage.tf.core.layers import batch_norm
-from garage.tf.misc import tensor_utils
+from garage.tf.core.mlp import mlp
 from garage.tf.policies import Policy
 from garage.tf.spaces import Box
 
 
-class ContinuousMLPPolicy(Policy, LayersPowered, Serializable):
+class ContinuousMLPPolicy(Policy, Serializable):
     """
     This class implements a policy network.
 
@@ -32,7 +29,7 @@ class ContinuousMLPPolicy(Policy, LayersPowered, Serializable):
                  hidden_nonlinearity=tf.nn.relu,
                  output_nonlinearity=tf.nn.tanh,
                  input_include_goal=False,
-                 bn=False):
+                 layer_norm=False):
         """
         Initialize class with multiple attributes.
 
@@ -52,10 +49,9 @@ class ContinuousMLPPolicy(Policy, LayersPowered, Serializable):
         assert isinstance(env_spec.action_space, Box)
 
         Serializable.quick_init(self, locals())
-        super(ContinuousMLPPolicy, self).__init__(env_spec)
+        super().__init__(env_spec)
 
         self.name = name
-        self._env_spec = env_spec
         if input_include_goal:
             self._obs_dim = env_spec.observation_space.flat_dim_with_keys(
                 ["observation", "desired_goal"])
@@ -66,14 +62,23 @@ class ContinuousMLPPolicy(Policy, LayersPowered, Serializable):
         self._hidden_sizes = hidden_sizes
         self._hidden_nonlinearity = hidden_nonlinearity
         self._output_nonlinearity = output_nonlinearity
-        self._batch_norm = bn
+        self._layer_norm = layer_norm
         self._policy_network_name = "policy_network"
-        # Build the network and initialized as Parameterized
-        self._f_prob_online, self._output_layer, self._obs_layer = self.build_net(  # noqa: E501
-            name=self.name)
-        LayersPowered.__init__(self, [self._output_layer])
 
-    def build_net(self, trainable=True, name=None):
+        with tf.name_scope(name):
+            self.f_prob, self.obs_ph = self.build_net(name)
+
+    def build_ph(self, input_include_goal=False):
+        if input_include_goal:
+            obs_dim = self.env_spec.observation_space.flat_dim_with_keys(
+                ["observation", "desired_goal"])
+        else:
+            obs_dim = self.env_spec.observation_space.flat_dim
+        obs_ph = tf.placeholder(tf.float32, shape=(None, obs_dim), name="obs")
+
+        return obs_ph
+
+    def build_net(self, name):
         """
         Set up q network based on class attributes.
 
@@ -83,57 +88,53 @@ class ContinuousMLPPolicy(Policy, LayersPowered, Serializable):
             reuse: A bool indicates whether reuse variables in the same scope.
             trainable: A bool indicates whether variables are trainable.
         """
-        with tf.variable_scope(name):
-            l_in = layers.InputLayer(shape=(None, self._obs_dim), name="obs")
+        obs_ph = self.build_ph()
 
-            l_hidden = l_in
-            for idx, hidden_size in enumerate(self._hidden_sizes):
-                if self._batch_norm:
-                    l_hidden = batch_norm(l_hidden)
+        network = mlp(
+            input_var=obs_ph,
+            output_dim=self._action_dim,
+            hidden_sizes=self._hidden_sizes,
+            name=name,
+            hidden_nonlinearity=self._hidden_nonlinearity,
+            output_nonlinearity=self._output_nonlinearity,
+            layer_normalization=self._layer_norm)
 
-                l_hidden = layers.DenseLayer(
-                    l_hidden,
-                    hidden_size,
-                    nonlinearity=self._hidden_nonlinearity,
-                    trainable=trainable,
-                    name="hidden_%d" % idx)
+        return network, obs_ph
 
-            l_output = layers.DenseLayer(
-                l_hidden,
-                self._action_dim,
-                nonlinearity=self._output_nonlinearity,
-                trainable=trainable,
-                name="output")
+    def get_f_sym(self, input_phs, name=None):
+        assert len(input_phs) == 1
+        obs_ph = input_phs
 
-            with tf.name_scope(self._policy_network_name):
-                action = layers.get_output(l_output)
-                scaled_action = tf.multiply(
-                    action, self._action_bound, name="scaled_action")
+        name = name if name else self.name
+        mlp_policy = mlp(
+            input_var=obs_ph,
+            output_dim=self._action_dim,
+            hidden_sizes=self._hidden_sizes,
+            name=name,
+            hidden_nonlinearity=self._hidden_nonlinearity,
+            output_nonlinearity=self._output_nonlinearity,
+            layer_normalization=self._layer_norm,
+            reuse=True)
 
-        f_prob_online = tensor_utils.compile_function(
-            inputs=[l_in.input_var], outputs=scaled_action)
-        output_layer = l_output
-        obs_layer = l_in
+        with tf.name_scope(self._policy_network_name):
+            scaled_action = tf.multiply(
+                mlp_policy, self._action_bound, name="scaled_action")
 
-        return f_prob_online, output_layer, obs_layer
-
-    def get_action_sym(self, obs_var, name=None, **kwargs):
-        """Return action sym according to obs_var."""
-        with tf.name_scope(name, "get_action_sym", [obs_var]):
-            with tf.name_scope(self._policy_network_name):
-                actions = layers.get_output(
-                    self._output_layer, {self._obs_layer: obs_var}, **kwargs)
-            return tf.multiply(actions, self._action_bound)
+        return scaled_action
 
     @overrides
     def get_action(self, observation):
         """Return a single action."""
-        return self._f_prob_online([observation])[0], dict()
+        sess = tf.get_default_session()
+        return sess.run(
+            self.f_prob, feed_dict={self.obs_ph: observation})[0], dict()
 
     @overrides
     def get_actions(self, observations):
         """Return multiple actions."""
-        return self._f_prob_online(observations), dict()
+        sess = tf.get_default_session()
+        return sess.run(
+            self.f_prob, feed_dict={self.obs_ph: observations}), dict()
 
     @property
     def vectorized(self):
