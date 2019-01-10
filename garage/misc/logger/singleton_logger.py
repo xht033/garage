@@ -1,17 +1,24 @@
+"""This is Garage's logger singleton.
+
+It takes in many different types of input and directs them to the correct
+output.
+"""
 from contextlib import contextmanager
-
-import numpy as np
-
-from garage.misc.tabulate import tabulate
 
 
 class Logger(object):
+    """This is the singleton class that handles logging."""
+
     def __init__(self):
         self._outputs = []
         self._prefixes = []
         self._prefix_str = ''
 
     def log(self, data, with_prefix=True, with_timestamp=True, color=None):
+        """Magic method that takes in all different types of input."""
+        if not self._outputs:
+            print('No outputs have been added to the logger.')
+
         prefix = ''
         if with_prefix:
             prefix = self._prefix_str
@@ -25,13 +32,27 @@ class Logger(object):
                     color=color)
 
     def add_output(self, output):
+        """Add a new output to the logger.
+
+        All data that is compatible with this output will be sent there.
+        """
         self._outputs.append(output)
 
     def reset_output(self):
+        """Remove all outputs that have been added to this logger."""
         self._outputs.clear()
 
     @contextmanager
     def prefix(self, key):
+        """Add a prefix to the logger.
+
+        This allows text output to be prepended with a given stack of prefixes.
+
+        Example:
+        with logger.prefix('prefix: '):
+            logger.log('test_string') # this will have the prefix
+        logger.log('test_string2') # this will not have the prefix
+        """
         self.push_prefix(key)
         try:
             yield
@@ -39,73 +60,11 @@ class Logger(object):
             self.pop_prefix()
 
     def push_prefix(self, prefix):
+        """Add prefix to prefix stack."""
         self._prefixes.append(prefix)
         self._prefix_str = ''.join(self._prefixes)
 
     def pop_prefix(self):
+        """Pop prefix from prefix stack."""
         del self._prefixes[-1]
         self._prefix_str = ''.join(self._prefixes)
-
-
-class TabularInput(object):
-    def __init__(self):
-        self._tabular = []
-        self._no_prefix_dict = {}
-        self._tabular_prefixes = []
-        self._tabular_prefix_str = ''
-
-    def __str__(self):
-        return tabulate(self._tabular)
-
-    def record_tabular(self, key, val):
-        self._tabular.append((self._tabular_prefix_str + str(key), str(val)))
-        self._no_prefix_dict[key] = val
-
-    def record_tabular_misc_stat(self, key, values, placement='back'):
-        if placement == 'front':
-            prefix = ""
-            suffix = key
-        else:
-            prefix = key
-            suffix = ""
-        if values:
-            self.record_tabular(prefix + "Average" + suffix,
-                                np.average(values))
-            self.record_tabular(prefix + "Std" + suffix, np.std(values))
-            self.record_tabular(prefix + "Median" + suffix, np.median(values))
-            self.record_tabular(prefix + "Min" + suffix, np.min(values))
-            self.record_tabular(prefix + "Max" + suffix, np.max(values))
-        else:
-            self.record_tabular(prefix + "Average" + suffix, np.nan)
-            self.record_tabular(prefix + "Std" + suffix, np.nan)
-            self.record_tabular(prefix + "Median" + suffix, np.nan)
-            self.record_tabular(prefix + "Min" + suffix, np.nan)
-            self.record_tabular(prefix + "Max" + suffix, np.nan)
-
-    @contextmanager
-    def tabular_prefix(self, key):
-        self.push_tabular_prefix(key)
-        try:
-            yield
-        finally:
-            self.pop_tabular_prefix()
-
-    def clear(self):
-        self._tabular.clear()
-
-    def push_tabular_prefix(self, key):
-        self._tabular_prefixes.append(key)
-        self._tabular_prefix_str = ''.join(self._tabular_prefixes)
-
-    def pop_tabular_prefix(self, ):
-        del self._tabular_prefixes[-1]
-        self._tabular_prefix_str = ''.join(self._tabular_prefixes)
-
-    def get_table_dict(self):
-        return dict(self._tabular)
-
-    def get_no_prefix_dict(self):
-        return self._no_prefix_dict
-
-    def get_table_key_set(self):
-        return set(dict(self._tabular).keys())

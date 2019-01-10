@@ -1,3 +1,4 @@
+# flake8: noqa
 """Pretty-print tabular data."""
 
 from collections import namedtuple
@@ -224,7 +225,7 @@ def simple_separated_format(separator):
 
 def _isconvertible(conv, string):
     try:
-        n = conv(string)
+        conv(string)
         return True
     except ValueError:
         return False
@@ -249,8 +250,8 @@ def _isint(string):
     >>> _isint("123.45")
     False
     """
-    return type(string) is int or (isinstance(
-        string, _binary_type) or isinstance(
+    return isinstance(
+        string, int) or (isinstance(string, _binary_type) or isinstance(
             string, _text_type)) and _isconvertible(int, string)  # noqa: W503
 
 

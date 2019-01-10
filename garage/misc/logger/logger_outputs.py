@@ -1,8 +1,12 @@
+"""Contains the output classes for the logger.
+
+Each class is sent logger data and handles it itself.
+"""
+from abc import ABC, abstractmethod
 import csv
 import datetime
 import os
 import sys
-from abc import ABC, abstractmethod
 
 import dateutil.tz
 
@@ -11,16 +15,22 @@ from garage.misc.logger import TabularInput
 
 
 class LoggerOutput(ABC):
+    """Abstract class for Logger Outputs."""
+
     @abstractmethod
     def log(self, data, prefix='', with_timestamp=True, color=None):
+        """This method is called by the logger when it needs to pass data."""
         pass
 
 
 class StdOutput(LoggerOutput):
+    """Standard console output for the logger."""
+
     def __init__(self):
         self.accept_types = (str, TabularInput)
 
     def log(self, data, prefix='', with_timestamp=True, color=None):
+        """Log data to console."""
         out = ''
         if isinstance(data, str):
             out = prefix + data
@@ -38,6 +48,8 @@ class StdOutput(LoggerOutput):
 
 
 class TextOutput(LoggerOutput):
+    """Text file output for logger."""
+
     def __init__(self, file_name):
         self.accept_types = (str, )
 
@@ -46,6 +58,7 @@ class TextOutput(LoggerOutput):
         self._log_file = open(file_name, 'a')
 
     def log(self, data, prefix='', with_timestamp=True, color=None):
+        """Log data to text file."""
         if not isinstance(data, self.accept_types):
             return
 
@@ -60,6 +73,8 @@ class TextOutput(LoggerOutput):
 
 
 class CsvOutput(LoggerOutput):
+    """CSV file output for logger."""
+
     def __init__(self, file_name):
         self.accept_types = (TabularInput, )
 
@@ -70,6 +85,7 @@ class CsvOutput(LoggerOutput):
         self._tabular_header_written = False
 
     def log(self, data, prefix='', with_timestamp=True, color=None):
+        """Log tabular data to CSV."""
         if not isinstance(data, self.accept_types):
             return
 

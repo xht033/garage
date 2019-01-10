@@ -12,18 +12,17 @@ import dateutil.tz
 import joblib
 import psutil
 
-from garage.misc.logger.logger_outputs import TextOutput, CsvOutput
-from garage.misc.logger import logger
-import garage.misc.logger.logger_utils as logger_utils
-import garage.plotter
-import garage.tf.plotter
 from garage import config
 from garage.experiment.experiment import concretize
 from garage.misc.console import colorize
-from garage.misc.ext import is_iterable
-from garage.misc.ext import set_seed
+from garage.misc.ext import is_iterable, set_seed
+from garage.misc.logger import logger
+from garage.misc.logger.logger_outputs import CsvOutput, TextOutput
+import garage.misc.logger.logger_utils as logger_utils
+import garage.plotter
 from garage.sampler import parallel_sampler
 from garage.sampler.utils import mask_signals
+import garage.tf.plotter
 
 
 def run_experiment(argv):

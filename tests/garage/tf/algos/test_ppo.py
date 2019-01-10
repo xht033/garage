@@ -1,3 +1,4 @@
+# flake8: noqa
 """
 This script creates a test that fails when garage.tf.algos.PPO performance is
 too low.

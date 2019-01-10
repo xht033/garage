@@ -1,3 +1,4 @@
+# flake8: noqa
 """
 This script creates a unittest that tests Gaussian policies in
 garage.tf.policies.

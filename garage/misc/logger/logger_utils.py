@@ -1,9 +1,10 @@
+# flake8: noqa
+from enum import Enum
 import json
 import os
-from enum import Enum
 
-from garage.misc.console import mkdir_p
 from garage.misc.autoargs import get_all_parameters
+from garage.misc.console import mkdir_p
 
 
 def log_parameters_lite(log_file, args):

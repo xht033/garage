@@ -1,5 +1,6 @@
-import pickle
+# flake8: noqa
 from os import path as osp
+import pickle
 
 
 class Snapshotter(object):
