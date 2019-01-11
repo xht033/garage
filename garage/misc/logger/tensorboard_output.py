@@ -41,7 +41,8 @@ class TensorBoardOutput(LoggerOutput):
         if isinstance(data, tf.Tensor):
             self.record_tensor(data.name, data)
         elif isinstance(data, TabularInput):
-            self.record_scalar()
+            for key, value in data.get_table_dict().items():
+                self.record_scalar(key, value)
 
     def set_dir(self, dir_name):
         if not dir_name:

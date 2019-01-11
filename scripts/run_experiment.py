@@ -14,6 +14,7 @@ import psutil
 
 from garage import config
 from garage.experiment.experiment import concretize
+from garage.misc import snapshotter
 from garage.misc.console import colorize
 from garage.misc.ext import is_iterable, set_seed
 from garage.misc.logger import logger
@@ -163,13 +164,11 @@ def run_experiment(argv):
     logger.add_output(TextOutput(text_log_file))
     logger.add_output(CsvOutput(tabular_log_file))
     logger.set_tensorboard_dir(log_dir)
-    prev_snapshot_dir = logger.get_snapshot_dir()
-    prev_mode = logger.get_snapshot_mode()
-    logger.set_snapshot_dir(log_dir)
-    logger.set_snapshot_mode(args.snapshot_mode)
-    logger.set_snapshot_gap(args.snapshot_gap)
-    logger.set_log_tabular_only(args.log_tabular_only)
-    logger.set_tensorboard_step_key(args.tensorboard_step_key)
+    prev_snapshot_dir = snapshotter.get_snapshot_dir()
+    prev_mode = snapshotter.get_snapshot_mode()
+    snapshotter.set_snapshot_dir(log_dir)
+    snapshotter.set_snapshot_mode(args.snapshot_mode)
+    snapshotter.set_snapshot_gap(args.snapshot_gap)
     logger.push_prefix("[%s] " % args.exp_name)
 
     if args.resume_from is not None:
