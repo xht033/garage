@@ -42,6 +42,13 @@ class Logger(object):
         """Remove all outputs that have been added to this logger."""
         self._outputs.clear()
 
+    def has_output(self, output_type):
+        """Checks to see if a given logger output is attached to the logger."""
+        for output in self._outputs:
+            if isinstance(output, output_type):
+                return True
+        return False
+
     @contextmanager
     def prefix(self, key):
         """Add a prefix to the logger.
