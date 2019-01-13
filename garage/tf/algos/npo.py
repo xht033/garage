@@ -62,7 +62,6 @@ class NPO(BatchPolopt):
     def init_opt(self):
         pol_loss_inputs, pol_opt_inputs = self._build_inputs()
         self._policy_opt_inputs = pol_opt_inputs
-
         pol_loss, pol_kl = self._build_policy_loss(pol_loss_inputs)
         self.optimizer.update_opt(
             loss=pol_loss,
@@ -76,7 +75,6 @@ class NPO(BatchPolopt):
     @overrides
     def optimize_policy(self, itr, samples_data):
         policy_opt_input_values = self._policy_opt_input_values(samples_data)
-
         # Train policy network
         logger.log("Computing loss before")
         loss_before = self.optimizer.loss(policy_opt_input_values)

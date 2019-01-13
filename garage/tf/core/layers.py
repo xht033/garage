@@ -1534,7 +1534,7 @@ class PseudoLSTMLayer(Layer):
                 initializer=tf.concat(axis=1, values=[h0s, c0s]))
             shuffled_hcs = tf.transpose(hcs, (1, 0, 2))
             shuffled_hs = shuffled_hcs[:, :, :self.num_units]
-            shuffled_cs = shuffled_hcs[:, :, self.num_units:]
+            # shuffled_cs = shuffled_hcs[:, :, self.num_units:]
             return shuffled_hs
 
 
@@ -1548,7 +1548,8 @@ class LSTMLayer(Layer):
                                  w_cf * c(t-1) + b_f)
     Cell gate:        c(t) = f(t) * c(t - 1) + i(t) * f_c(x(t) @ W_xc +
                              h(t-1) @ W_hc + b_c)
-    Out gate:         o(t) = f_o(x(t) @ W_xo + h(t-1) W_ho + w_co * c(t) + b_o)
+    Out gate:         o(t) = f_o(x(t) @ W_xo + h(t-1) @ W_ho +
+                             w_co * c(t) + b_o)
     New hidden state: h(t) = o(t) * f_h(c(t))
 
     Note that the incoming, forget, cell, and out vectors must have the same
@@ -1734,7 +1735,7 @@ class LSTMLayer(Layer):
                 initializer=tf.concat(axis=1, values=[h0s, c0s]))
             shuffled_hcs = tf.transpose(hcs, (1, 0, 2))
             shuffled_hs = shuffled_hcs[:, :, :self.num_units]
-            shuffled_cs = shuffled_hcs[:, :, self.num_units:]
+            # shuffled_cs = shuffled_hcs[:, :, self.num_units:]
             if 'recurrent_state_output' in kwargs:
                 kwargs['recurrent_state_output'][self] = shuffled_hcs
             return shuffled_hs
@@ -1867,7 +1868,7 @@ class TfBasicLSTMLayer(Layer):
                 )
                 shuffled_hcs = tf.transpose(hcs, (1, 0, 2))
                 shuffled_hs = shuffled_hcs[:, :, :self.num_units]
-                shuffled_cs = shuffled_hcs[:, :, self.num_units:]
+                # shuffled_cs = shuffled_hcs[:, :, self.num_units:]
                 return shuffled_hs
 
     def get_output_shape_for(self, input_shape):

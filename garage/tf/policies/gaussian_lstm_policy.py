@@ -215,6 +215,7 @@ class GaussianLSTMPolicy(StochasticPolicy, LayersPowered, Serializable):
                         self._mean_network_name, values=[all_input_var]):
                     means = L.get_output(self.mean_network.output_layer,
                                          {self.l_input: all_input_var})
+
                 with tf.name_scope(
                         self._std_network_name, values=[all_input_var]):
                     log_stds = L.get_output(self.l_log_std,
