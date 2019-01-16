@@ -121,15 +121,15 @@ class GaussianMLPModel(Model, Serializable):
                 std, parameterized std and sample tensors
             model_info: a dict that contains the distribution tensor
         """
-        if inputs is None:
-            input_var = tf.placeholder(
-                shape=[None, self._input_dim],
-                dtype=tf.float32,
-            )
-        else:
-            input_var = inputs
 
         with tf.variable_scope(self.name, reuse=reuse):
+            if inputs is None:
+                input_var = tf.placeholder(
+                    shape=[None, self._input_dim],
+                    dtype=tf.float32,
+                )
+            else:
+                input_var = inputs
             if self._std_share_network:
                 # mean and std networks share an MLP
                 b = np.concatenate(
@@ -192,18 +192,18 @@ class GaussianMLPModel(Model, Serializable):
                     std_param_var = tf.minimum(std_param_var,
                                                self._max_std_param)
 
-        with tf.variable_scope("std_parameterization"):
-            # build std_var with std parameterization
-            if self._std_parameterization == "exp":
-                std_var = tf.exp(std_param_var)
-            elif self._std_parameterization == "softplus":
-                std_var = tf.log(1. + tf.exp(std_param_var))
-            else:
-                raise NotImplementedError
+            with tf.variable_scope("std_parameterization"):
+                # build std_var with std parameterization
+                if self._std_parameterization == "exp":
+                    std_var = tf.exp(std_param_var)
+                elif self._std_parameterization == "softplus":
+                    std_var = tf.log(1. + tf.exp(std_param_var))
+                else:
+                    raise NotImplementedError
 
-        dist = tf.contrib.distributions.MultivariateNormalDiag(
-            mean_var, std_var)
-        sample_var = dist.sample(seed=ext.get_seed())
+            dist = tf.contrib.distributions.MultivariateNormalDiag(
+                mean_var, std_var)
+            sample_var = dist.sample(seed=ext.get_seed())
 
         inputs = {
             "input_var": input_var,

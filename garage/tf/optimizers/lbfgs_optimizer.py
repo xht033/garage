@@ -45,8 +45,9 @@ class LbfgsOptimizer(Serializable):
 
             def get_opt_output():
                 with tf.name_scope("get_opt_output", [loss, params]):
-                    flat_grad = tensor_utils.flatten_tensor_variables(
-                        tf.gradients(loss, params))
+                    grad = tf.gradients(loss, params)
+                    grad_with_zeros = [g if g is not None else tf.zeros_like(p) for g, p in zip(grad, params)]
+                    flat_grad = tensor_utils.flatten_tensor_variables(grad_with_zeros)
                     return [
                         tf.cast(loss, tf.float64),
                         tf.cast(flat_grad, tf.float64)

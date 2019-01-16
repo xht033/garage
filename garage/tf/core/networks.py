@@ -19,7 +19,8 @@ def mlp(input_var,
         output_nonlinearity=None,
         output_w_init=tf.contrib.layers.xavier_initializer(),
         output_b_init=tf.zeros_initializer(),
-        layer_normalization=False):
+        layer_normalization=False,
+        reuse=tf.AUTO_REUSE):
     """
     MLP function.
 
@@ -45,7 +46,7 @@ def mlp(input_var,
     Return:
         The output tf.Tensor of the MLP
     """
-    with tf.variable_scope(name):
+    with tf.variable_scope(name, reuse=reuse):
         l_hid = input_var
         for idx, hidden_size in enumerate(hidden_sizes):
             l_hid = tf.layers.dense(
