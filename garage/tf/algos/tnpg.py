@@ -1,27 +1,26 @@
+"""Truncated Natural Policy Gradient."""
 from garage.tf.algos.npo import NPO
-from garage.tf.algos.npo import PGLoss
-from garage.tf.optimizers import FirstOrderOptimizer
+from garage.tf.optimizers import ConjugateGradientOptimizer
 
 
-class VPG(NPO):
+class TNPG(NPO):
     """
-    Vanilla Policy Gradient.
+    Truncated Natural Policy Gradient.
+
+    TNPG uses Conjugate Gradient to compute the policy gradient.
+
     """
 
     def __init__(self, optimizer=None, optimizer_args=None, **kwargs):
         if optimizer is None:
-            default_args = dict(
-                batch_size=None,
-                max_epochs=1,
-            )
-            optimizer = FirstOrderOptimizer
+            optimizer = ConjugateGradientOptimizer
+            default_args = dict(max_backtracks=1)
             if optimizer_args is None:
                 optimizer_args = default_args
             else:
                 optimizer_args = dict(default_args, **optimizer_args)
-        super(VPG, self).__init__(
-            pg_loss=PGLoss.VANILLA,
+        super().__init__(
             optimizer=optimizer,
             optimizer_args=optimizer_args,
-            name="VPG",
+            name="TNPG",
             **kwargs)

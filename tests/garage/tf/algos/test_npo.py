@@ -1,25 +1,23 @@
-# flake8: noqa
 """
-This script creates a test that fails when garage.tf.algos.TRPO performance is
+This script creates a test that fails when garage.tf.algos.NPO performance is
 too low.
 """
 import gym
 import tensorflow as tf
 
-import garage.misc.logger as logger
 from garage.envs import normalize
+import garage.misc.logger as logger
 from garage.misc.logger.tensorboard_output import TensorBoardOutput
-from garage.tf.algos import TRPO
+from garage.tf.algos import NPO
 from garage.tf.baselines import GaussianMLPBaseline
 from garage.tf.envs import TfEnv
 from garage.tf.policies import GaussianMLPPolicy
 from tests.fixtures import TfGraphTestCase
 
 
-class TestTRPO(TfGraphTestCase):
-    def test_trpo_pendulum(self):
-        """Test TRPO with Pendulum environment."""
-
+class TestNPO(TfGraphTestCase):
+    def test_npo_pendulum(self):
+        """Test NPO with Pendulum environment."""
         logger.reset_output(TensorBoardOutput())
         env = TfEnv(normalize(gym.make("InvertedDoublePendulum-v2")))
         policy = GaussianMLPPolicy(
@@ -32,7 +30,7 @@ class TestTRPO(TfGraphTestCase):
             env_spec=env.spec,
             regressor_args=dict(hidden_sizes=(32, 32)),
         )
-        algo = TRPO(
+        algo = NPO(
             env=env,
             policy=policy,
             baseline=baseline,
@@ -45,10 +43,10 @@ class TestTRPO(TfGraphTestCase):
             plot=False,
         )
         last_avg_ret = algo.train(sess=self.sess)
-        assert last_avg_ret > 50
+        assert last_avg_ret > 35
 
-    def test_trpo_unknown_kl_constraint(self):
-        """Test TRPO with unkown KL constraints."""
+    def test_npo_unknown_pg_loss(self):
+        """Test NPO with unkown policy gradient loss."""
         logger.reset_output(TensorBoardOutput())
         env = TfEnv(normalize(gym.make("InvertedDoublePendulum-v2")))
         policy = GaussianMLPPolicy(
@@ -62,17 +60,10 @@ class TestTRPO(TfGraphTestCase):
             regressor_args=dict(hidden_sizes=(32, 32)),
         )
         with self.assertRaises(NotImplementedError) as context:
-            TRPO(
+            NPO(
                 env=env,
                 policy=policy,
                 baseline=baseline,
-                batch_size=2048,
-                max_path_length=100,
-                n_itr=10,
-                discount=0.99,
-                gae_lambda=0.98,
-                policy_ent_coeff=0.0,
-                plot=False,
-                kl_constraint="random kl_constraint",
+                pg_loss="random pg_loss",
             )
-        assert "Unknown KLConstraint" in str(context.exception)
+        assert "Unknown PGLoss" in str(context.exception)

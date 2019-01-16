@@ -1,10 +1,9 @@
+# flake8: noqa
 import unittest
 
 from garage.envs.mujoco import SwimmerEnv
-from garage.envs.mujoco.randomization import Distribution
-from garage.envs.mujoco.randomization import Method
-from garage.envs.mujoco.randomization import randomize
-from garage.envs.mujoco.randomization import Variations
+from garage.envs.mujoco.randomization import Distribution, Method, Variations, \
+    randomize
 
 
 class TestDynamicsRand(unittest.TestCase):

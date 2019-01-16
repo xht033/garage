@@ -36,7 +36,10 @@ W605  # invalid escape sequence
 
 # Files or directories to exclude from checks applied to all files.
 exclude_all=(
-./tests/'*',.git,__pycache__
+./tests/'*'
+.git
+__pycache__
+$(cat .gitignore)
 )
 
 
@@ -56,6 +59,7 @@ W504  # line break after binary operator
 # Files or directories to exclude from checks applied to changed files.
 exclude_changed=(
 ./tests/'*'
+$(cat .gitignore)
 )
 
 
@@ -71,6 +75,7 @@ W503  # line break before binary operator
 # Files or directories to exclude from checks applied to added files.
 exclude_added=(
 ./tests/'*'
+$(cat .gitignore)
 )
 
 
@@ -88,7 +93,9 @@ W503  # line break before binary operator
 
 # Files or directories to exclude from checks applied to all files.
 test_exclude_all=(
-  .git,__pycache__
+.git
+__pycache__
+$(cat .gitignore)
 )
 
 
@@ -101,6 +108,7 @@ D  # docstring rules disabled
 
 # Files or directories to exclude from checks applied to changed test files.
 test_exclude_changed=(
+$(cat .gitignore)
 )
 
 
@@ -113,6 +121,7 @@ D  # docstring rules disabled
 
 # Files or directories to exclude from checks applied to added test files.
 test_exclude_added=(
+$(cat .gitignore)
 )
 
 

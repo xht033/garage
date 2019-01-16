@@ -38,9 +38,21 @@ class Logger(object):
         """
         self._outputs.append(output)
 
-    def reset_output(self):
+    def reset_all(self):
         """Remove all outputs that have been added to this logger."""
         self._outputs.clear()
+
+    def remove_output(self, output_type):
+        """Remove an output of a given type."""
+        self._outputs = [
+            output for output in self._outputs
+            if not isinstance(output, output_type)
+        ]
+
+    def reset_output(self, output):
+        """Removes, then re-adds a given output to the logger."""
+        self.remove_output(type(output))
+        self.add_output(output)
 
     def has_output(self, output_type):
         """Checks to see if a given logger output is attached to the logger."""
