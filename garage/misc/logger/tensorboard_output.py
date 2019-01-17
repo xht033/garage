@@ -17,7 +17,7 @@ from garage.misc.logger.logger_outputs import LoggerOutput
 
 class TensorBoardOutput(LoggerOutput):
     def __init__(self, log_dir):
-        self.accept_types = (tf.Tensor, TabularInput)
+        self.accept_types = (tf.Tensor, TabularInput, tuple)
 
         self._scalars = tf.Summary()
         self._scope_tensor = {}
@@ -37,12 +37,16 @@ class TensorBoardOutput(LoggerOutput):
         self._layout_writer = None
         self._layout_writer_dir = None
 
-    def log(self, data, prefix='', with_timestamp=True, color=None):
+        self.set_dir(log_dir)
+
+    def log_output(self, data, record=None, **kwargs):
         if isinstance(data, tf.Tensor):
             self.record_tensor(data.name, data)
         elif isinstance(data, TabularInput):
             for key, value in data.get_table_dict().items():
                 self.record_scalar(key, value)
+        elif isinstance(data, tuple) and record == 'histogram':
+            self.record_histogram(data[0], data[1])
 
     def set_dir(self, dir_name):
         if not dir_name:
@@ -59,6 +63,9 @@ class TensorBoardOutput(LoggerOutput):
 
             self._default_step = 0
             assert self._writer is not None
+
+    def dump(self, step=None):
+        self.dump_tensorboard(step=step)
 
     def dump_tensorboard(self, step=None):
         if not self._writer:

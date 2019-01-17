@@ -1,9 +1,10 @@
+# flake8: noqa
 import theano
 import theano.tensor as TT
 
 from garage.algos import BatchPolopt
 from garage.misc import ext
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.misc.overrides import overrides
 from garage.theano.misc import tensor_utils
 from garage.theano.optimizers import PenaltyLbfgsOptimizer

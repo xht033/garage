@@ -1,3 +1,4 @@
+# flake8: noqa
 """This file overrides the train method of garage/algos/batch_polopt.py.
 
 A socket has been added to notify the test of interrupted experiments about the
@@ -7,7 +8,7 @@ different stages in the experiment lifecycle.
 from multiprocessing.connection import Client
 
 from garage.algos import BatchPolopt
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.plotter import Plotter
 from tests.integration_tests.test_sigint import ExpLifecycle
 

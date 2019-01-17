@@ -1,3 +1,4 @@
+# flake8: noqa
 from itertools import chain
 from itertools import zip_longest
 
@@ -5,11 +6,10 @@ import numpy as np
 
 from garage.algos import RLAlgorithm
 from garage.core import Serializable
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.misc.special import discount_cumsum
 from garage.plotter import Plotter
-from garage.sampler import parallel_sampler
-from garage.sampler import stateful_pool
+from garage.sampler import parallel_sampler, stateful_pool
 from garage.sampler.utils import rollout
 
 

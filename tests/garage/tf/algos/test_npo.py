@@ -1,3 +1,4 @@
+# flake8: noqa
 """
 This script creates a test that fails when garage.tf.algos.NPO performance is
 too low.
@@ -6,7 +7,7 @@ import gym
 import tensorflow as tf
 
 from garage.envs import normalize
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.tf.algos import NPO
 from garage.tf.baselines import GaussianMLPBaseline

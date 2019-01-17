@@ -1,12 +1,12 @@
+# flake8: noqa
 import time
 
 import tensorflow as tf
 
 from garage.algos import RLAlgorithm
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.tf.plotter import Plotter
-from garage.tf.samplers import BatchSampler
-from garage.tf.samplers import OnPolicyVectorizedSampler
+from garage.tf.samplers import BatchSampler, OnPolicyVectorizedSampler
 
 
 class BatchPolopt(RLAlgorithm):

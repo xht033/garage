@@ -14,22 +14,18 @@ class Logger(object):
         self._prefixes = []
         self._prefix_str = ''
 
-    def log(self, data, with_prefix=True, with_timestamp=True, color=None):
+    def log(self, data, **kwargs):
         """Magic method that takes in all different types of input."""
         if not self._outputs:
             print('No outputs have been added to the logger.')
 
-        prefix = ''
-        if with_prefix:
-            prefix = self._prefix_str
+        kwargs['prefix'] = self._prefix_str
+        if 'with_prefix' in kwargs and not kwargs.with_prefix:
+            kwargs['prefix'] = ''
 
         for output in self._outputs:
             if isinstance(data, output.accept_types):
-                output.log(
-                    data,
-                    prefix=prefix,
-                    with_timestamp=with_timestamp,
-                    color=color)
+                output.log_output(data, **kwargs)
 
     def add_output(self, output):
         """Add a new output to the logger.
@@ -43,7 +39,7 @@ class Logger(object):
         self._outputs.clear()
 
     def remove_output(self, output_type):
-        """Remove an output of a given type."""
+        """Remove all outputs of a given type."""
         self._outputs = [
             output for output in self._outputs
             if not isinstance(output, output_type)
@@ -60,6 +56,18 @@ class Logger(object):
             if isinstance(output, output_type):
                 return True
         return False
+
+    def get_output(self, output_type):
+        """Returns the first output of the given type found."""
+        for output in self._outputs:
+            if isinstance(output, output_type):
+                return output
+
+    def dump_output(self, output_type, step=None):
+        """Dumps all outputs of the given type."""
+        for output in self._outputs:
+            if isinstance(output, output_type):
+                output.dump(step=step)
 
     @contextmanager
     def prefix(self, key):

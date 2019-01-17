@@ -70,6 +70,3 @@ class Snapshotter(object):
                 pass
             else:
                 raise NotImplementedError
-
-
-snapshotter = Snapshotter()

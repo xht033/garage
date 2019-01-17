@@ -7,8 +7,7 @@ import tensorflow as tf
 
 from garage.envs.dm_control import DmControlEnv
 from garage.misc import ext
-import garage.misc.logger as logger
-from garage.misc.logger.tensorboard_output import TensorBoardOutput
+from garage.misc.logger import TensorBoardOutput, logger
 
 
 class TfTestCase(unittest.TestCase):

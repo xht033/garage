@@ -1,5 +1,6 @@
-from functools import partial
+# flake8: noqa
 import pickle
+from functools import partial
 
 import lasagne
 import numpy as np
@@ -7,9 +8,8 @@ import pyprind
 import theano.tensor as TT
 
 from garage.algos import RLAlgorithm
-from garage.misc import ext
-from garage.misc import special
-import garage.misc.logger as logger
+from garage.misc import ext, special
+from garage.misc.logger import logger
 from garage.misc.overrides import overrides
 from garage.plotter import Plotter
 from garage.sampler import parallel_sampler

@@ -1,3 +1,4 @@
+# flake8: noqa
 """This file is a copy of garage/theano/algos/npo.py
 
 The only difference is the use of InstrumentedBatchPolopt to notify the test of
@@ -7,7 +8,7 @@ import theano
 import theano.tensor as TT
 
 from garage.misc import ext
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.misc.overrides import overrides
 from garage.theano.misc import tensor_utils
 from garage.theano.optimizers import PenaltyLbfgsOptimizer

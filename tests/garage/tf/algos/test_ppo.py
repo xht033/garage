@@ -6,14 +6,12 @@ too low.
 import gym
 import tensorflow as tf
 
-import garage.misc.logger as logger
 from garage.envs import normalize
-from garage.misc.logger.tensorboard_output import TensorBoardOutput
+from garage.misc.logger import TensorBoardOutput, logger
 from garage.tf.algos import PPO
 from garage.tf.baselines import GaussianMLPBaseline
 from garage.tf.envs import TfEnv
-from garage.tf.policies import GaussianLSTMPolicy
-from garage.tf.policies import GaussianMLPPolicy
+from garage.tf.policies import GaussianLSTMPolicy, GaussianMLPPolicy
 from tests.fixtures import TfGraphTestCase
 
 

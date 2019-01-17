@@ -1,7 +1,7 @@
-"""Contains inputs for the logger.
+"""Contains the singleton tabular class.
 
-Each class takes in input and stores it for later use by the logger.
-Inputs may be passed to the logger via its log() method.
+This class allows the recording of tabular information for later output.
+TabularInput may be passed to the logger via its log() method.
 """
 from contextlib import contextmanager
 

@@ -1,8 +1,8 @@
+# flake8: noqa
 import numpy as np
 
-from garage.misc import special
-from garage.misc import tensor_utils
-import garage.misc.logger as logger
+from garage.misc import special, tensor_utils
+from garage.misc.logger import logger
 from garage.sampler import utils
 
 

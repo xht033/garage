@@ -1,3 +1,4 @@
+# flake8: noqa
 import argparse
 import ast
 import base64
@@ -17,9 +18,7 @@ from garage.experiment.experiment import concretize
 from garage.misc import snapshotter
 from garage.misc.console import colorize
 from garage.misc.ext import is_iterable, set_seed
-from garage.misc.logger import logger
-from garage.misc.logger.logger_outputs import CsvOutput, TextOutput
-import garage.misc.logger.logger_utils as logger_utils
+from garage.misc.logger import CsvOutput, TextOutput, logger, logger_utils
 import garage.plotter
 from garage.sampler import parallel_sampler
 from garage.sampler.utils import mask_signals

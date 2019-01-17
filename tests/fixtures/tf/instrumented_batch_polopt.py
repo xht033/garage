@@ -1,15 +1,17 @@
+# flake8: noqa
 """This file overrides the train method of garage/tf/algos/batch_polopt.py.
 
 A socket has been added to notify the test of interrupted experiments about the
 different stages in the experiment lifecycle.
 """
 
-from multiprocessing.connection import Client
 import time
+from multiprocessing.connection import Client
 
 import tensorflow as tf
 
-import garage.misc.logger as logger
+from garage.misc import snapshotter
+from garage.misc.logger import logger, tabular
 from garage.tf.algos import BatchPolopt
 from tests.integration_tests.test_sigint import ExpLifecycle
 
@@ -54,12 +56,12 @@ class InstrumentedBatchPolopt(BatchPolopt):
                     params = self.get_itr_snapshot(itr, samples_data)
                     if self.store_paths:
                         params["paths"] = samples_data["paths"]
-                    logger.save_itr_params(itr, params)
+                    snapshotter.save_itr_params(itr, params)
                     logger.log("Saved")
-                    logger.record_tabular('Time', time.time() - start_time)
-                    logger.record_tabular('ItrTime',
+                    tabular.record_tabular('Time', time.time() - start_time)
+                    tabular.record_tabular('ItrTime',
                                           time.time() - itr_start_time)
-                    logger.dump_tabular(with_prefix=False)
+                    logger.log(tabular)
                     if self.plot:
                         conn.send(ExpLifecycle.UPDATE_PLOT)
                         self.plotter.update_plot(self.policy,

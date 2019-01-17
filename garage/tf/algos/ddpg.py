@@ -1,3 +1,4 @@
+# flake8: noqa
 """
 This module implements a DDPG model.
 
@@ -13,7 +14,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.contrib as tc
 
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.misc.overrides import overrides
 from garage.tf.algos.off_policy_rl_algorithm import OffPolicyRLAlgorithm
 from garage.tf.misc import tensor_utils

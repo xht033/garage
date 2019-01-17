@@ -1,3 +1,4 @@
+# flake8: noqa
 """
 This script creates a test that fails when garage.tf.algos.TNPG performance is
 too low.
@@ -5,8 +6,7 @@ too low.
 from garage.baselines import LinearFeatureBaseline
 from garage.envs import normalize
 from garage.envs.box2d import CartpoleEnv
-import garage.misc.logger as logger
-from garage.misc.logger.tensorboard_output import TensorBoardOutput
+from garage.misc.logger import TensorBoardOutput, logger
 from garage.tf.algos import TNPG
 from garage.tf.envs import TfEnv
 from garage.tf.policies import GaussianMLPPolicy

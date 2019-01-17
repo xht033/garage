@@ -1,5 +1,6 @@
+# flake8: noqa
 from garage.algos import RLAlgorithm
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.plotter import Plotter
 from garage.sampler import BatchSampler
 

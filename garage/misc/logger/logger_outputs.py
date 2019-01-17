@@ -18,8 +18,13 @@ class LoggerOutput(ABC):
     """Abstract class for Logger Outputs."""
 
     @abstractmethod
-    def log(self, data, prefix='', with_timestamp=True, color=None):
+    def log_output(self, data, **kwargs):
         """This method is called by the logger when it needs to pass data."""
+        pass
+
+    @abstractmethod
+    def dump(self, step=None):
+        """This method is called by the logger to dump an output to file."""
         pass
 
 
@@ -29,7 +34,8 @@ class StdOutput(LoggerOutput):
     def __init__(self):
         self.accept_types = (str, TabularInput)
 
-    def log(self, data, prefix='', with_timestamp=True, color=None):
+    def log_output(
+            self, data, prefix='', with_timestamp=True, color=None, **kwargs):
         """Log data to console."""
         out = ''
         if isinstance(data, str):
@@ -57,7 +63,7 @@ class TextOutput(LoggerOutput):
         self._text_log_file = file_name
         self._log_file = open(file_name, 'a')
 
-    def log(self, data, prefix='', with_timestamp=True, color=None):
+    def log_output(self, data, with_timestamp=True, **kwargs):
         """Log data to text file."""
         if not isinstance(data, self.accept_types):
             return
@@ -84,7 +90,7 @@ class CsvOutput(LoggerOutput):
 
         self._tabular_header_written = False
 
-    def log(self, data, prefix='', with_timestamp=True, color=None):
+    def log_output(self, data, prefix='', **kwargs):
         """Log tabular data to CSV."""
         if not isinstance(data, self.accept_types):
             return

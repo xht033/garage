@@ -1,3 +1,4 @@
+# flake8: noqa
 """
 This script creates a test that fails when garage.tf.algos.DDPG performance is
 too low.
@@ -5,7 +6,7 @@ too low.
 import gym
 import tensorflow as tf
 
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.replay_buffer import SimpleReplayBuffer
 from garage.tf.algos import DDPG

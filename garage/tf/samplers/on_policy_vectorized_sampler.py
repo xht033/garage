@@ -1,10 +1,11 @@
+# flake8: noqa
 import itertools
 import pickle
 
 import numpy as np
 
 from garage.misc import tensor_utils
-import garage.misc.logger as logger
+from garage.misc.logger import logger
 from garage.misc.overrides import overrides
 from garage.misc.prog_bar_counter import ProgBarCounter
 from garage.tf.envs import VecEnvExecutor

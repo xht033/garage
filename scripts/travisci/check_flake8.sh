@@ -21,6 +21,7 @@ E711  # comparison to None should be 'if cond is not None:'
 E721  # do not compare types, use 'isinstance()'
 E731  # do not assign a lambda expression, use a def
 E741  # ambiguous variable name
+I101  # Imported names are in the wrong order
 N802  # function names should be lowercase
 N806  # variables in functions should be lowercase
 F811  # redefinition of unused symbol
