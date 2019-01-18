@@ -99,8 +99,9 @@ class InstrumentedNPO(InstrumentedBatchPolopt):
 
         num_traj = self.batch_size // self.max_path_length
         actions = samples_data["actions"][:num_traj, ...]
-        logger.log(("{}/Actions".format(self.policy.name), actions),
-                   record='histogram')
+        logger.log(
+            ("{}/Actions".format(self.policy.name), actions),
+            record='histogram')
 
         self._fit_baseline(samples_data)
 

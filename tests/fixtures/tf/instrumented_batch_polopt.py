@@ -60,7 +60,7 @@ class InstrumentedBatchPolopt(BatchPolopt):
                     logger.log("Saved")
                     tabular.record_tabular('Time', time.time() - start_time)
                     tabular.record_tabular('ItrTime',
-                                          time.time() - itr_start_time)
+                                           time.time() - itr_start_time)
                     logger.log(tabular)
                     if self.plot:
                         conn.send(ExpLifecycle.UPDATE_PLOT)
