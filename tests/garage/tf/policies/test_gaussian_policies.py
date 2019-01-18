@@ -1,4 +1,3 @@
-# flake8: noqa
 """
 This script creates a unittest that tests Gaussian policies in
 garage.tf.policies.
@@ -13,7 +12,8 @@ from garage.misc.logger import logger
 from garage.misc.logger.tensorboard_output import TensorBoardOutput
 from garage.tf.algos import TRPO
 from garage.tf.envs import TfEnv
-from garage.tf.optimizers import ConjugateGradientOptimizer, FiniteDifferenceHvp
+from garage.tf.optimizers import ConjugateGradientOptimizer, \
+    FiniteDifferenceHvp
 from garage.tf.policies import GaussianGRUPolicy, GaussianLSTMPolicy, \
     GaussianMLPPolicy
 from tests.fixtures import TfGraphTestCase

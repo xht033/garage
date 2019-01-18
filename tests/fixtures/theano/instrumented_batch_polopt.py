@@ -1,4 +1,3 @@
-# flake8: noqa
 """This file overrides the train method of garage/algos/batch_polopt.py.
 
 A socket has been added to notify the test of interrupted experiments about the

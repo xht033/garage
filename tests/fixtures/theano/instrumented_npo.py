@@ -1,4 +1,3 @@
-# flake8: noqa
 """This file is a copy of garage/theano/algos/npo.py
 
 The only difference is the use of InstrumentedBatchPolopt to notify the test of

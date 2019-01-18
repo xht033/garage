@@ -1,4 +1,3 @@
-# flake8: noqa
 import gc
 import unittest
 
@@ -8,7 +7,7 @@ import tensorflow as tf
 from garage import config
 from garage.envs.dm_control import DmControlEnv
 from garage.misc import ext
-from garage.misc.logger import TensorBoardOutput, logger
+from garage.misc.logger import logger, TensorBoardOutput
 
 
 class TfTestCase(unittest.TestCase):

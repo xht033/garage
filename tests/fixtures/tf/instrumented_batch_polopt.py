@@ -1,12 +1,11 @@
-# flake8: noqa
 """This file overrides the train method of garage/tf/algos/batch_polopt.py.
 
 A socket has been added to notify the test of interrupted experiments about the
 different stages in the experiment lifecycle.
 """
 
-import time
 from multiprocessing.connection import Client
+import time
 
 import tensorflow as tf
 

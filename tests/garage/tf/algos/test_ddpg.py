@@ -1,4 +1,3 @@
-# flake8: noqa
 """
 This script creates a test that fails when garage.tf.algos.DDPG performance is
 too low.
