@@ -20,7 +20,7 @@ class Logger(object):
             print('No outputs have been added to the logger.')
 
         kwargs['prefix'] = self._prefix_str
-        if 'with_prefix' in kwargs and not kwargs.with_prefix:
+        if 'with_prefix' in kwargs and not kwargs['with_prefix']:
             kwargs['prefix'] = ''
 
         for output in self._outputs:
@@ -62,6 +62,7 @@ class Logger(object):
         for output in self._outputs:
             if isinstance(output, output_type):
                 return output
+        return False
 
     def dump_output(self, output_type, step=None):
         """Dumps all outputs of the given type."""

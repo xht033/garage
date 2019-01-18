@@ -22,7 +22,6 @@ class LoggerOutput(ABC):
         """This method is called by the logger when it needs to pass data."""
         pass
 
-    @abstractmethod
     def dump(self, step=None):
         """This method is called by the logger to dump an output to file."""
         pass

@@ -10,13 +10,14 @@ from tensorboard.backend.event_processing import plugin_event_multiplexer \
 from tensorboard.plugins.custom_scalar import layout_pb2, metadata
 import tensorflow as tf
 
+from garage import config
 from garage.misc.console import mkdir_p
 from garage.misc.logger import TabularInput
 from garage.misc.logger.logger_outputs import LoggerOutput
 
 
 class TensorBoardOutput(LoggerOutput):
-    def __init__(self, log_dir):
+    def __init__(self, log_dir=config.LOG_DIR):
         self.accept_types = (tf.Tensor, TabularInput, tuple)
 
         self._scalars = tf.Summary()
@@ -39,13 +40,13 @@ class TensorBoardOutput(LoggerOutput):
 
         self.set_dir(log_dir)
 
-    def log_output(self, data, record=None, **kwargs):
+    def log_output(self, data, **kwargs):
         if isinstance(data, tf.Tensor):
             self.record_tensor(data.name, data)
         elif isinstance(data, TabularInput):
             for key, value in data.get_table_dict().items():
                 self.record_scalar(key, value)
-        elif isinstance(data, tuple) and record == 'histogram':
+        elif isinstance(data, tuple) and kwargs['record'] == 'histogram':
             self.record_histogram(data[0], data[1])
 
     def set_dir(self, dir_name):

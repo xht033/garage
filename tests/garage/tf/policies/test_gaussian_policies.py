@@ -5,6 +5,7 @@ garage.tf.policies.
 """
 from nose2 import tools
 
+from garage import config
 from garage.baselines import LinearFeatureBaseline
 from garage.envs import normalize
 from garage.envs.box2d import CartpoleEnv
@@ -23,7 +24,7 @@ policies = [GaussianGRUPolicy, GaussianLSTMPolicy, GaussianMLPPolicy]
 class TestGaussianPolicies(TfGraphTestCase):
     @tools.params(*policies)
     def test_gaussian_policies(self, policy_cls):
-        logger._tensorboard = TensorBoardOutput()
+        logger.add_output(TensorBoardOutput(config.LOG_DIR))
         env = TfEnv(normalize(CartpoleEnv()))
 
         policy = policy_cls(name="policy", env_spec=env.spec)

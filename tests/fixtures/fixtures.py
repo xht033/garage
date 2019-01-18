@@ -5,6 +5,7 @@ import unittest
 from dm_control.suite import ALL_TASKS
 import tensorflow as tf
 
+from garage import config
 from garage.envs.dm_control import DmControlEnv
 from garage.misc import ext
 from garage.misc.logger import TensorBoardOutput, logger
@@ -26,7 +27,7 @@ class TfGraphTestCase(unittest.TestCase):
         self.graph = tf.Graph()
         self.sess = tf.Session(graph=self.graph)
         self.sess.__enter__()
-        logger.reset_output(TensorBoardOutput())
+        logger.reset_output(TensorBoardOutput(config.LOG_DIR))
         ext.set_seed(1)
 
     def tearDown(self):
