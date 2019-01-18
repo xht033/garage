@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 status=0
 
+pylint --rcfile=../../setup.cfg ../../tests/benchmarks/test_benchmark_ddpg.py
+
 if [[ "${TRAVIS_PULL_REQUEST}" != "false" && "${TRAVIS}" == "true" ]]; then
   pre-commit run --source "${TRAVIS_COMMIT_RANGE%...*}" \
                  --origin "${TRAVIS_COMMIT_RANGE#*...}"

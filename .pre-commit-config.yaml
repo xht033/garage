@@ -14,7 +14,7 @@ repos:
         stages: [commit, push]
     -   id: pylint
         name: pylint
-        entry: pylint
+        entry: scripts/pylint.sh
         args: ['--rcfile=setup.cfg']
         stages: [commit, push]
         language: system
