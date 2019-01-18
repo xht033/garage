@@ -1,4 +1,3 @@
-# flake8: noqa
 import numpy as np
 import scipy.optimize
 import theano
@@ -166,25 +165,24 @@ class REPS(BatchPolopt, Serializable):
         # Symbolic dual
         if is_recurrent:
             dual = param_eta * self.epsilon + \
-                   param_eta * TT.log(
-                       TT.sum(
-                           TT.exp(
-                            delta_v / param_eta - TT.max(delta_v / param_eta)
-                           ) * valid_var
-                       ) / TT.sum(valid_var)
-                   ) + param_eta * TT.max(delta_v / param_eta)
+                param_eta * TT.log(
+                    TT.sum(
+                        TT.exp(delta_v / param_eta
+                               - TT.max(delta_v / param_eta))
+                        * valid_var
+                    ) / TT.sum(valid_var)
+                ) + param_eta * TT.max(delta_v / param_eta)
         else:
             dual = param_eta * self.epsilon + \
-                   param_eta * TT.log(
-                       TT.mean(
-                           TT.exp(
-                            delta_v / param_eta - TT.max(delta_v / param_eta)
-                           )
-                       )
-                   ) + param_eta * TT.max(delta_v / param_eta)
+                param_eta * TT.log(
+                    TT.mean(
+                        TT.exp(delta_v / param_eta
+                               - TT.max(delta_v / param_eta))
+                    )
+                ) + param_eta * TT.max(delta_v / param_eta)
         # Add L2 regularization.
         dual += self.L2_reg_dual * \
-                (TT.square(param_eta) + TT.square(1 / param_eta))
+            (TT.square(param_eta) + TT.square(1 / param_eta))
 
         # Symbolic dual gradient
         dual_grad = TT.grad(cost=dual, wrt=[param_eta, param_v])
@@ -210,9 +208,9 @@ class REPS(BatchPolopt, Serializable):
         o = np.clip(path["observations"], -10, 10)
         lr = len(path["rewards"])
         al = np.arange(lr).reshape(-1, 1) / 100.0
-        return np.concatenate(
-            [o, o**2, al, al**2, al**3,
-             np.ones((lr, 1))], axis=1)
+        return np.concatenate([o, o**2, al, al**2, al**3,
+                               np.ones((lr, 1))],
+                              axis=1)
 
     @overrides
     def optimize_policy(self, itr, samples_data):
@@ -261,16 +259,16 @@ class REPS(BatchPolopt, Serializable):
         def eval_dual(input):
             param_eta = input[0]
             param_v = input[1:]
-            val = f_dual(*([rewards, feat_diff] + state_info_list +
-                           recurrent_vals + [param_eta, param_v]))
+            val = f_dual(*([rewards, feat_diff] + state_info_list
+                           + recurrent_vals + [param_eta, param_v]))
             return val.astype(np.float64)
 
         # Set BFGS gradient eval function
         def eval_dual_grad(input):
             param_eta = input[0]
             param_v = input[1:]
-            grad = f_dual_grad(*([rewards, feat_diff] + state_info_list +
-                                 recurrent_vals + [param_eta, param_v]))
+            grad = f_dual_grad(*([rewards, feat_diff] + state_info_list
+                                 + recurrent_vals + [param_eta, param_v]))
             eta_grad = np.float(grad[0])
             v_grad = grad[1]
             return np.hstack([eta_grad, v_grad])
@@ -335,8 +333,8 @@ class REPS(BatchPolopt, Serializable):
 
         f_kl = self.opt_info['f_kl']
 
-        mean_kl = f_kl(*([observations, actions] + state_info_list +
-                         dist_info_list + recurrent_vals)).astype(np.float64)
+        mean_kl = f_kl(*([observations, actions] + state_info_list
+                         + dist_info_list + recurrent_vals)).astype(np.float64)
 
         logger.log('eta %f -> %f' % (eta_before, self.param_eta))
 

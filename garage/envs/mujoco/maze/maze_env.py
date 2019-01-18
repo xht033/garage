@@ -1,4 +1,3 @@
-# flake8: noqa
 import math
 import os.path as osp
 import tempfile
@@ -228,7 +227,7 @@ class MazeEnv(gym.Wrapper, Serializable):
             obj = obj.env
         try:
             return obj.get_ori()
-        except (NotImplementedError, AttributeError) as e:
+        except (NotImplementedError, AttributeError):
             pass
         return self.env.sim.data.qpos[self.__class__.ORI_IND]
 
@@ -271,13 +270,13 @@ class MazeEnv(gym.Wrapper, Serializable):
             for j in range(len(structure[0])):
                 if structure[i][j] == 'g':
                     minx = j * size_scaling - size_scaling \
-                           * 0.5 - self._init_torso_x
+                        * 0.5 - self._init_torso_x
                     maxx = j * size_scaling + size_scaling \
-                           * 0.5 - self._init_torso_x
+                        * 0.5 - self._init_torso_x
                     miny = i * size_scaling - size_scaling \
-                           * 0.5 - self._init_torso_y
+                        * 0.5 - self._init_torso_y
                     maxy = i * size_scaling + size_scaling \
-                           * 0.5 - self._init_torso_y
+                        * 0.5 - self._init_torso_y
                     return minx, maxx, miny, maxy
         warnings.warn("Goal not found", Warning)
         return None
@@ -290,13 +289,13 @@ class MazeEnv(gym.Wrapper, Serializable):
             for j in range(len(structure[0])):
                 if structure[i][j] == 1:
                     minx = j * size_scaling - size_scaling \
-                           * 0.5 - self._init_torso_x
+                        * 0.5 - self._init_torso_x
                     maxx = j * size_scaling + size_scaling \
-                           * 0.5 - self._init_torso_x
+                        * 0.5 - self._init_torso_x
                     miny = i * size_scaling - size_scaling \
-                           * 0.5 - self._init_torso_y
+                        * 0.5 - self._init_torso_y
                     maxy = i * size_scaling + size_scaling \
-                           * 0.5 - self._init_torso_y
+                        * 0.5 - self._init_torso_y
                     if minx <= x <= maxx and miny <= y <= maxy:
                         return True
         return False

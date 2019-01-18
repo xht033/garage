@@ -1,4 +1,3 @@
-# flake8: noqa
 from os import path as osp
 import pickle
 

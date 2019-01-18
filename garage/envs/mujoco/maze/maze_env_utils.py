@@ -1,4 +1,3 @@
-# flake8: noqa
 import math
 import os.path as osp
 
@@ -58,7 +57,8 @@ def line_intersect(pt1, pt2, ptA, ptB):
     #
     DET = (-dx1 * dy + dy1 * dx)
 
-    if math.fabs(DET) < DET_TOLERANCE: return (0, 0, 0, 0, 0)
+    if math.fabs(DET) < DET_TOLERANCE:
+        return (0, 0, 0, 0, 0)
 
     # now, the determinant should be OK
     DETinv = 1.0 / DET
@@ -233,12 +233,6 @@ def plot_ray(self, reading, ray_idx, color='r'):
                                    1] = cell
 
     fig, ax = plt.subplots()
-    im = ax.pcolor(
-        -np.array(structure_plot),
-        cmap='gray',
-        edgecolor='black',
-        linestyle=':',
-        lw=1)
     x_labels = list(range(len(structure[0])))
     y_labels = list(range(len(structure)))
     ax.grid(True)  # elimiate this to avoid inner lines
@@ -254,7 +248,8 @@ def plot_ray(self, reading, ray_idx, color='r'):
     # (with 0,0 in the top-right corner of struc)
     o_xy = np.array(
         self._find_robot()
-    )  # this is self.init_torso_x, self.init_torso_y !!: center of the cell xy!
+    )  # this is self.init_torso_x, self.init_torso_y
+    # !!: center of the cell xy!
     o_ij = (o_xy / size_scaling).astype(
         int)  # this is the position in the grid (check if correct..)
 
@@ -325,12 +320,6 @@ def plot_state(self, name='sensors', state=None):
                                    1] = cell
 
     fig, ax = plt.subplots()
-    im = ax.pcolor(
-        -np.array(structure_plot),
-        cmap='gray',
-        edgecolor='black',
-        linestyle=':',
-        lw=1)
     x_labels = list(range(len(structure[0])))
     y_labels = list(range(len(structure)))
     ax.grid(True)  # elimiate this to avoid inner lines
@@ -359,7 +348,8 @@ def plot_state(self, name='sensors', state=None):
 
     for ray_idx in range(self._n_bins):
         if obs[ray_idx]:
-            length_wall = self._sensor_range - obs[ray_idx] * self._sensor_range
+            length_wall = (self._sensor_range - obs[ray_idx] *
+                           self._sensor_range)
         else:
             length_wall = 1e-6
         ray_ori = ori - self._sensor_span * 0.5 + ray_idx / (
@@ -376,8 +366,8 @@ def plot_state(self, name='sensors', state=None):
                  [robot_xy_plot[1], end_xy_plot[1]], 'r')
 
         if obs[ray_idx + self._n_bins]:
-            length_goal = self._sensor_range - obs[ray_idx + self.
-                                                   _n_bins] * self._sensor_range
+            length_goal = self._sensor_range - obs[
+                ray_idx + self._n_bins] * self._sensor_range
         else:
             length_goal = 1e-6
         ray_ori = ori - self._sensor_span * 0.5 + ray_idx / (

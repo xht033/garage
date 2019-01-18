@@ -1,10 +1,9 @@
-# flake8: noqa
 import cma
 import numpy as np
 
 from garage.algos import RLAlgorithm
 from garage.core import Serializable
-from garage.misc import logger, tabular, snapshotter
+from garage.misc import logger, snapshotter, tabular
 from garage.misc.special import discount_cumsum
 from garage.plotter import Plotter
 from garage.sampler import parallel_sampler, stateful_pool

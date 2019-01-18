@@ -1,4 +1,3 @@
-# flake8: noqa
 from functools import partial
 import pickle
 
@@ -250,8 +249,8 @@ class DDPG(RLAlgorithm):
         yvar = TT.vector('ys')
 
         qf_weight_decay_term = 0.5 * self.qf_weight_decay * \
-                               sum([TT.sum(TT.square(param)) for param in
-                                    self.qf.get_params(regularizable=True)])
+            sum([TT.sum(TT.square(param)) for param in
+                self.qf.get_params(regularizable=True)])
 
         qval = self.qf.get_qval_sym(obs, action)
 
@@ -314,11 +313,11 @@ class DDPG(RLAlgorithm):
         policy_surr = f_train_policy(obs)
 
         target_policy.set_param_values(
-            target_policy.get_param_values() * (1.0 - self.soft_target_tau) +
-            self.policy.get_param_values() * self.soft_target_tau)
+            target_policy.get_param_values() * (1.0 - self.soft_target_tau)
+            + self.policy.get_param_values() * self.soft_target_tau)
         target_qf.set_param_values(
-            target_qf.get_param_values() * (1.0 - self.soft_target_tau) +
-            self.qf.get_param_values() * self.soft_target_tau)
+            target_qf.get_param_values() * (1.0 - self.soft_target_tau)
+            + self.qf.get_param_values() * self.soft_target_tau)
 
         self.qf_loss_averages.append(qf_loss)
         self.policy_surr_averages.append(policy_surr)

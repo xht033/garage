@@ -1,4 +1,3 @@
-# flake8: noqa
 from itertools import chain, zip_longest
 
 import numpy as np
@@ -122,8 +121,8 @@ class CEM(RLAlgorithm, Serializable):
             # sample around the current distribution
             extra_var_mult = max(1.0 - itr / self.extra_decay_time, 0)
             sample_std = np.sqrt(
-                np.square(cur_std) +
-                np.square(self.extra_std) * extra_var_mult)
+                np.square(cur_std)
+                + np.square(self.extra_std) * extra_var_mult)
             if self.batch_size is None:
                 criterion = 'paths'
                 threshold = self.n_samples

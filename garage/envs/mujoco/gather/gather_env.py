@@ -1,4 +1,3 @@
-# flake8: noqa
 import math
 import os.path as osp
 import tempfile
@@ -6,8 +5,8 @@ import xml.etree.ElementTree as ET
 
 import glfw
 import gym
-from mujoco_py import MjRenderContext, MjSim, MjViewer, functions, \
-    load_model_from_path
+from mujoco_py import (functions, load_model_from_path, MjRenderContext, MjSim,
+                       MjViewer)
 from mujoco_py.builder import cymj
 from mujoco_py.generated.const import CAT_ALL
 import numpy as np

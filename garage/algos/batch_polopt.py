@@ -1,4 +1,3 @@
-# flake8: noqa
 from garage.algos import RLAlgorithm
 from garage.misc import snapshotter
 from garage.misc.logger import logger, tabular

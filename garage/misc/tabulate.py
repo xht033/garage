@@ -1,4 +1,3 @@
-# flake8: noqa
 """Pretty-print tabular data."""
 
 from collections import namedtuple
@@ -100,7 +99,7 @@ def _mediawiki_row_with_attrs(separator, cell_values, colwidths, colaligns):
 def _latex_line_begin_tabular(colwidths, colaligns):
     alignment = {"left": "l", "right": "r", "center": "c", "decimal": "r"}
     tabular_columns_fmt = "".join([alignment.get(a, "l") for a in colaligns])
-    return "\\begin{tabular}{" + tabular_columns_fmt + "}\n\hline"
+    return "\\begin{tabular}{" + tabular_columns_fmt + "}\n\\hline"
 
 
 _table_formats = {
@@ -199,8 +198,8 @@ _table_formats = {
 
 tabulate_formats = list(sorted(_table_formats.keys()))
 
-_invisible_codes = re.compile("\x1b\[\d*m")  # ANSI color codes
-_invisible_codes_bytes = re.compile(b"\x1b\[\d*m")  # ANSI color codes
+_invisible_codes = re.compile("\x1b\\[\\d*m")  # ANSI color codes
+_invisible_codes_bytes = re.compile(b"\x1b\\[\\d*m")  # ANSI color codes
 
 
 def simple_separated_format(separator):
@@ -779,12 +778,12 @@ def tabulate(tabular_data,
 
     >>> print(tabulate([["spam", 41.9999], ["eggs", "451.0"]],
     ... tablefmt="latex"))
-    \begin{tabular}{lr}
-    \hline
+    \\begin{tabular}{lr}
+    \\hline
      eggs & 451      \\
      spam &  41.9999 \\
-    \hline
-    \end{tabular}
+    \\hline
+    \\end{tabular}
 
     """
 
@@ -793,8 +792,8 @@ def tabulate(tabular_data,
     # optimization: look for ANSI control codes once,
     # enable smart width functions only if a control code is found
     plain_text = '\n'.join(
-        ['\t'.join(map(_text_type, headers))] +
-        ['\t'.join(map(_text_type, row)) for row in list_of_lists])
+        ['\t'.join(map(_text_type, headers))]
+        + ['\t'.join(map(_text_type, row)) for row in list_of_lists])
     has_invisible = re.search(_invisible_codes, plain_text)
     if has_invisible:
         width_fn = _visible_width

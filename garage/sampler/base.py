@@ -1,7 +1,6 @@
-# flake8: noqa
 import numpy as np
 
-from garage.misc import logger, tabular, special, tensor_utils
+from garage.misc import logger, special, tabular, tensor_utils
 from garage.sampler import utils
 
 
@@ -58,8 +57,8 @@ class BaseSampler(Sampler):
         for idx, path in enumerate(paths):
             path_baselines = np.append(all_path_baselines[idx], 0)
             deltas = path["rewards"] + \
-                     self.algo.discount * path_baselines[1:] - \
-                     path_baselines[:-1]
+                self.algo.discount * path_baselines[1:] - \
+                path_baselines[:-1]
             path["advantages"] = special.discount_cumsum(
                 deltas, self.algo.discount * self.algo.gae_lambda)
             path["returns"] = special.discount_cumsum(path["rewards"],
@@ -159,8 +158,8 @@ class BaseSampler(Sampler):
             undiscounted_returns = [sum(path["rewards"]) for path in paths]
 
             ent = np.sum(
-                self.algo.policy.distribution.entropy(agent_infos) *
-                valids) / np.sum(valids)
+                self.algo.policy.distribution.entropy(agent_infos)
+                * valids) / np.sum(valids)
 
             samples_data = dict(
                 observations=obs,

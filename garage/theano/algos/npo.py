@@ -1,4 +1,3 @@
-# flake8: noqa
 import theano
 import theano.tensor as TT
 

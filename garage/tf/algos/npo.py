@@ -1,4 +1,3 @@
-# flake8: noqa
 """Natural Policy Gradient Optimization."""
 from enum import Enum, unique
 

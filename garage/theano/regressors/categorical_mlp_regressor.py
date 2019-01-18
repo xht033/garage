@@ -1,4 +1,3 @@
-# flake8: noqa
 import lasagne.layers as L
 import lasagne.nonlinearities as NL
 import numpy as np
