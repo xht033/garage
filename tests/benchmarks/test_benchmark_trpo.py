@@ -25,6 +25,8 @@ import tensorflow as tf
 from garage.envs import normalize
 from garage.misc import ext
 from garage.misc import logger as garage_logger
+from garage.misc.logger import CsvOutput
+from garage.misc.logger import TensorBoardOutput
 from garage.tf.algos import TRPO
 from garage.tf.baselines import GaussianMLPBaseline
 from garage.tf.envs import TfEnv
@@ -135,12 +137,12 @@ def run_garage(env, seed, log_dir):
 
         # Set up logger since we are not using run_experiment
         tabular_log_file = osp.join(log_dir, "progress.csv")
-        garage_logger.add_tabular_output(tabular_log_file)
-        garage_logger.set_tensorboard_dir(log_dir)
+        garage_logger.add_output(CsvOutput(tabular_log_file))
+        garage_logger.add_output(TensorBoardOutput(log_dir))
 
         algo.train()
 
-        garage_logger.remove_tabular_output(tabular_log_file)
+        garage_logger.remove_output(CsvOutput)
 
         return tabular_log_file
 

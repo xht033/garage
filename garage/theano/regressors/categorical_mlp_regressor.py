@@ -1,3 +1,4 @@
+# flake8: noqa
 import lasagne.layers as L
 import lasagne.nonlinearities as NL
 import numpy as np
@@ -5,13 +6,12 @@ import theano
 import theano.tensor as TT
 
 from garage.core import Serializable
-from garage.misc import logger
+from garage.misc import tabular
 from garage.theano.core import LasagnePowered
 from garage.theano.core.network import MLP
 from garage.theano.distributions import Categorical
 from garage.theano.misc import tensor_utils
-from garage.theano.optimizers import LbfgsOptimizer
-from garage.theano.optimizers import PenaltyLbfgsOptimizer
+from garage.theano.optimizers import LbfgsOptimizer, PenaltyLbfgsOptimizer
 
 NONE = list()
 
@@ -142,11 +142,11 @@ class CategoricalMLPRegressor(LasagnePowered):
             prefix = self._name + "_"
         else:
             prefix = ""
-        logger.record_tabular(prefix + 'LossBefore', loss_before)
+        tabular.record_tabular(prefix + 'LossBefore', loss_before)
         self._optimizer.optimize(inputs)
         loss_after = self._optimizer.loss(inputs)
-        logger.record_tabular(prefix + 'LossAfter', loss_after)
-        logger.record_tabular(prefix + 'dLoss', loss_before - loss_after)
+        tabular.record_tabular(prefix + 'LossAfter', loss_after)
+        tabular.record_tabular(prefix + 'dLoss', loss_before - loss_after)
 
     def predict(self, xs):
         return self._f_predict(np.asarray(xs))

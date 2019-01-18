@@ -1,3 +1,4 @@
+# flake8: noqa
 import lasagne
 import lasagne.layers as L
 import lasagne.nonlinearities as NL
@@ -6,15 +7,14 @@ import theano
 import theano.tensor as TT
 
 from garage.core import Serializable
-from garage.misc import logger
+from garage.misc import tabular
 from garage.misc.ext import iterate_minibatches_generic
 from garage.theano.core import LasagnePowered
 from garage.theano.core.lasagne_layers import ParamLayer
 from garage.theano.core.network import ConvNetwork
 from garage.theano.distributions import DiagonalGaussian
 from garage.theano.misc.tensor_utils import compile_function
-from garage.theano.optimizers import LbfgsOptimizer
-from garage.theano.optimizers import PenaltyLbfgsOptimizer
+from garage.theano.optimizers import LbfgsOptimizer, PenaltyLbfgsOptimizer
 
 
 class GaussianConvRegressor(LasagnePowered):
@@ -265,12 +265,13 @@ class GaussianConvRegressor(LasagnePowered):
             if self._use_trust_region:
                 mean_kl += self._optimizer.constraint_val(inputs)
 
-        logger.record_tabular(prefix + 'LossBefore', loss_before / batch_count)
-        logger.record_tabular(prefix + 'LossAfter', loss_after / batch_count)
-        logger.record_tabular(prefix + 'dLoss',
-                              loss_before - loss_after / batch_count)
+        tabular.record_tabular(prefix + 'LossBefore',
+                               loss_before / batch_count)
+        tabular.record_tabular(prefix + 'LossAfter', loss_after / batch_count)
+        tabular.record_tabular(prefix + 'dLoss',
+                               loss_before - loss_after / batch_count)
         if self._use_trust_region:
-            logger.record_tabular(prefix + 'MeanKL', mean_kl / batch_count)
+            tabular.record_tabular(prefix + 'MeanKL', mean_kl / batch_count)
 
     def predict(self, xs):
         """

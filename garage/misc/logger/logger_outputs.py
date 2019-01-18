@@ -11,7 +11,7 @@ import sys
 import dateutil.tz
 
 from garage.misc.console import colorize, mkdir_p
-from garage.misc.logger import TabularInput
+from garage.misc.logger.singleton_tabular import TabularInput
 
 
 class LoggerOutput(ABC):
@@ -34,8 +34,12 @@ class StdOutput(LoggerOutput):
     def __init__(self):
         self.accept_types = (str, TabularInput)
 
-    def log_output(
-            self, data, prefix='', with_timestamp=True, color=None, **kwargs):
+    def log_output(self,
+                   data,
+                   prefix='',
+                   with_timestamp=True,
+                   color=None,
+                   **kwargs):
         """Log data to console."""
         out = ''
         if isinstance(data, str):
@@ -85,7 +89,6 @@ class CsvOutput(LoggerOutput):
         self.accept_types = (TabularInput, )
 
         mkdir_p(os.path.dirname(file_name))
-        self._csv_log_file = file_name
         self._log_file = open(file_name, 'w')
 
         self._tabular_header_written = False

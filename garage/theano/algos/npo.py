@@ -4,7 +4,7 @@ import theano.tensor as TT
 
 from garage.algos import BatchPolopt
 from garage.misc import ext
-from garage.misc.logger import logger
+from garage.misc.logger import tabular
 from garage.misc.overrides import overrides
 from garage.theano.misc import tensor_utils
 from garage.theano.optimizers import PenaltyLbfgsOptimizer
@@ -116,11 +116,11 @@ class NPO(BatchPolopt):
         self.optimizer.optimize(all_input_values)
         mean_kl = self.optimizer.constraint_val(all_input_values)
         loss_after = self.optimizer.loss(all_input_values)
-        logger.record_tabular('LossBefore', loss_before)
-        logger.record_tabular('LossAfter', loss_after)
-        logger.record_tabular('MeanKLBefore', mean_kl_before)
-        logger.record_tabular('MeanKL', mean_kl)
-        logger.record_tabular('dLoss', loss_before - loss_after)
+        tabular.record_tabular('LossBefore', loss_before)
+        tabular.record_tabular('LossAfter', loss_after)
+        tabular.record_tabular('MeanKLBefore', mean_kl_before)
+        tabular.record_tabular('MeanKL', mean_kl)
+        tabular.record_tabular('dLoss', loss_before - loss_after)
         return dict()
 
     @overrides

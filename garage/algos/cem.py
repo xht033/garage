@@ -1,12 +1,11 @@
 # flake8: noqa
-from itertools import chain
-from itertools import zip_longest
+from itertools import chain, zip_longest
 
 import numpy as np
 
 from garage.algos import RLAlgorithm
 from garage.core import Serializable
-from garage.misc.logger import logger
+from garage.misc import logger, snapshotter, tabular
 from garage.misc.special import discount_cumsum
 from garage.plotter import Plotter
 from garage.sampler import parallel_sampler, stateful_pool
@@ -152,27 +151,27 @@ class CEM(RLAlgorithm, Serializable):
             cur_std = best_xs.std(axis=0)
             best_x = best_xs[0]
             logger.push_prefix('itr #%d | ' % itr)
-            logger.record_tabular('Iteration', itr)
-            logger.record_tabular('CurStdMean', np.mean(cur_std))
+            tabular.record_tabular('Iteration', itr)
+            tabular.record_tabular('CurStdMean', np.mean(cur_std))
             undiscounted_returns = np.array(
                 [path['undiscounted_return'] for path in paths])
-            logger.record_tabular('AverageReturn',
-                                  np.mean(undiscounted_returns))
-            logger.record_tabular('StdReturn', np.std(undiscounted_returns))
-            logger.record_tabular('MaxReturn', np.max(undiscounted_returns))
-            logger.record_tabular('MinReturn', np.min(undiscounted_returns))
-            logger.record_tabular('AverageDiscountedReturn', np.mean(fs))
-            logger.record_tabular('NumTrajs', len(paths))
+            tabular.record_tabular('AverageReturn',
+                                   np.mean(undiscounted_returns))
+            tabular.record_tabular('StdReturn', np.std(undiscounted_returns))
+            tabular.record_tabular('MaxReturn', np.max(undiscounted_returns))
+            tabular.record_tabular('MinReturn', np.min(undiscounted_returns))
+            tabular.record_tabular('AverageDiscountedReturn', np.mean(fs))
+            tabular.record_tabular('NumTrajs', len(paths))
             paths = list(chain(
                 *[d['full_paths']
                   for d in paths]))  # flatten paths for the case n_evals > 1
-            logger.record_tabular(
+            tabular.record_tabular(
                 'AvgTrajLen',
                 np.mean([len(path['returns']) for path in paths]))
 
             self.policy.set_param_values(best_x)
             self.policy.log_diagnostics(paths)
-            logger.save_itr_params(
+            snapshotter.save_itr_params(
                 itr,
                 dict(
                     itr=itr,
@@ -181,7 +180,7 @@ class CEM(RLAlgorithm, Serializable):
                     cur_mean=cur_mean,
                     cur_std=cur_std,
                 ))
-            logger.dump_tabular(with_prefix=False)
+            logger.log(tabular, with_prefix=False)
             logger.pop_prefix()
             if self.plot:
                 self.plotter.update_plot(self.policy, self.max_path_length)

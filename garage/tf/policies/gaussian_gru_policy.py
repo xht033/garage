@@ -1,8 +1,9 @@
+# flake8: noqa
 import numpy as np
 import tensorflow as tf
 
 from garage.core import Serializable
-from garage.misc import logger
+from garage.misc import tabular
 from garage.misc.overrides import overrides
 from garage.tf.core import LayersPowered
 import garage.tf.core.layers as L
@@ -294,4 +295,4 @@ class GaussianGRUPolicy(StochasticPolicy, LayersPowered, Serializable):
     def log_diagnostics(self, paths):
         log_stds = np.vstack(
             [path["agent_infos"]["log_std"] for path in paths])
-        logger.record_tabular('AveragePolicyStd', np.mean(np.exp(log_stds)))
+        tabular.record_tabular('AveragePolicyStd', np.mean(np.exp(log_stds)))

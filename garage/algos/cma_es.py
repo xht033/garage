@@ -4,7 +4,7 @@ import numpy as np
 
 from garage.algos import RLAlgorithm
 from garage.core import Serializable
-from garage.misc.logger import logger
+from garage.misc import logger, tabular, snapshotter
 from garage.misc.special import discount_cumsum
 from garage.plotter import Plotter
 from garage.sampler import parallel_sampler, stateful_pool
@@ -115,27 +115,27 @@ class CMAES(RLAlgorithm, Serializable):
             es.tell(xs, fs)
 
             logger.push_prefix('itr #%d | ' % itr)
-            logger.record_tabular('Iteration', itr)
-            logger.record_tabular('CurStdMean', np.mean(cur_std))
+            tabular.record_tabular('Iteration', itr)
+            tabular.record_tabular('CurStdMean', np.mean(cur_std))
             undiscounted_returns = np.array(
                 [info['undiscounted_return'] for info in infos])
-            logger.record_tabular('AverageReturn',
-                                  np.mean(undiscounted_returns))
-            logger.record_tabular('StdReturn', np.mean(undiscounted_returns))
-            logger.record_tabular('MaxReturn', np.max(undiscounted_returns))
-            logger.record_tabular('MinReturn', np.min(undiscounted_returns))
-            logger.record_tabular('AverageDiscountedReturn', np.mean(fs))
-            logger.record_tabular(
+            tabular.record_tabular('AverageReturn',
+                                   np.mean(undiscounted_returns))
+            tabular.record_tabular('StdReturn', np.mean(undiscounted_returns))
+            tabular.record_tabular('MaxReturn', np.max(undiscounted_returns))
+            tabular.record_tabular('MinReturn', np.min(undiscounted_returns))
+            tabular.record_tabular('AverageDiscountedReturn', np.mean(fs))
+            tabular.record_tabular(
                 'AvgTrajLen',
                 np.mean([len(info['returns']) for info in infos]))
             self.policy.log_diagnostics(infos)
-            logger.save_itr_params(
+            snapshotter.save_itr_params(
                 itr, dict(
                     itr=itr,
                     policy=self.policy,
                     env=self.env,
                 ))
-            logger.dump_tabular(with_prefix=False)
+            logger.log(tabular, with_prefix=False)
             if self.plot:
                 self.plotter.update_plot(self.policy, self.max_path_length)
             logger.pop_prefix()

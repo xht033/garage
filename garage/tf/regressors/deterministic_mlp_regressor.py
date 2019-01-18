@@ -1,10 +1,10 @@
+# flake8: noqa
 import numpy as np
 import tensorflow as tf
 
 from garage.core import Serializable
-from garage.misc import logger
-from garage.tf.core import LayersPowered
-from garage.tf.core import Parameterized
+from garage.misc import tabular
+from garage.tf.core import LayersPowered, Parameterized
 import garage.tf.core.layers as L
 from garage.tf.core.network import MLP
 from garage.tf.misc import tensor_utils
@@ -130,11 +130,11 @@ class DeterministicMLPRegressor(LayersPowered, Serializable, Parameterized):
             prefix = self.name + "/"
         else:
             prefix = ""
-        logger.record_tabular(prefix + 'LossBefore', loss_before)
+        tabular.record_tabular(prefix + 'LossBefore', loss_before)
         self.optimizer.optimize(inputs)
         loss_after = self.optimizer.loss(inputs)
-        logger.record_tabular(prefix + 'LossAfter', loss_after)
-        logger.record_tabular(prefix + 'dLoss', loss_before - loss_after)
+        tabular.record_tabular(prefix + 'LossAfter', loss_after)
+        tabular.record_tabular(prefix + 'dLoss', loss_before - loss_after)
 
     def predict(self, xs):
         return self.f_predict(np.asarray(xs))

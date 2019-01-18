@@ -1,10 +1,11 @@
+# flake8: noqa
 import math
 import os.path as osp
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from garage.misc import logger
+from garage.misc import snapshotter
 
 
 def line_intersect(pt1, pt2, ptA, ptB):
@@ -388,7 +389,7 @@ def plot_state(self, name='sensors', state=None):
         plt.plot([robot_xy_plot[0], end_xy_plot[0]],
                  [robot_xy_plot[1], end_xy_plot[1]], 'g')
 
-    log_dir = logger.get_snapshot_dir()
+    log_dir = snapshotter.get_snapshot_dir()
     ax.set_title('sensors: ' + name)
 
     plt.savefig(osp.join(

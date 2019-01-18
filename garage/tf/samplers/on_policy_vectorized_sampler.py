@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 
 from garage.misc import tensor_utils
-from garage.misc.logger import logger
+from garage.misc.logger import logger, tabular
 from garage.misc.overrides import overrides
 from garage.misc.prog_bar_counter import ProgBarCounter
 from garage.tf.envs import VecEnvExecutor
@@ -113,8 +113,8 @@ class OnPolicyVectorizedSampler(BatchSampler):
 
         pbar.stop()
 
-        logger.record_tabular("PolicyExecTime", policy_time)
-        logger.record_tabular("EnvExecTime", env_time)
-        logger.record_tabular("ProcessExecTime", process_time)
+        tabular.record_tabular("PolicyExecTime", policy_time)
+        tabular.record_tabular("EnvExecTime", env_time)
+        tabular.record_tabular("ProcessExecTime", process_time)
 
         return paths

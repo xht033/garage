@@ -19,6 +19,7 @@ from garage.misc import snapshotter
 from garage.misc.console import colorize
 from garage.misc.ext import is_iterable, set_seed
 from garage.misc.logger import CsvOutput, TextOutput, logger, logger_utils
+from garage.misc.logger import TensorBoardOutput
 import garage.plotter
 from garage.sampler import parallel_sampler
 from garage.sampler.utils import mask_signals
@@ -162,7 +163,7 @@ def run_experiment(argv):
 
     logger.add_output(TextOutput(text_log_file))
     logger.add_output(CsvOutput(tabular_log_file))
-    logger.set_tensorboard_dir(log_dir)
+    logger.add_output(TensorBoardOutput(log_dir))
     prev_snapshot_dir = snapshotter.get_snapshot_dir()
     prev_mode = snapshotter.get_snapshot_mode()
     snapshotter.set_snapshot_dir(log_dir)
@@ -196,10 +197,10 @@ def run_experiment(argv):
                 for _ in maybe_iter:
                     pass
 
-    logger.set_snapshot_mode(prev_mode)
-    logger.set_snapshot_dir(prev_snapshot_dir)
-    logger.remove_tabular_output(tabular_log_file)
-    logger.remove_text_output(text_log_file)
+    snapshotter.set_snapshot_mode(prev_mode)
+    snapshotter.set_snapshot_dir(prev_snapshot_dir)
+    logger.remove_output(CsvOutput)
+    logger.remove_output(TextOutput)
     logger.pop_prefix()
 
 

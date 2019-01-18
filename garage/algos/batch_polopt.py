@@ -1,6 +1,7 @@
 # flake8: noqa
 from garage.algos import RLAlgorithm
-from garage.misc.logger import logger
+from garage.misc import snapshotter
+from garage.misc.logger import logger, tabular
 from garage.plotter import Plotter
 from garage.sampler import BatchSampler
 
@@ -102,9 +103,9 @@ class BatchPolopt(RLAlgorithm):
                 params["algo"] = self
                 if self.store_paths:
                     params["paths"] = samples_data["paths"]
-                logger.save_itr_params(itr, params)
+                snapshotter.save_itr_params(itr, params)
                 logger.log("saved")
-                logger.dump_tabular(with_prefix=False)
+                logger.log(tabular, with_prefix=False)
                 if self.plot:
                     plotter.update_plot(self.policy, self.max_path_length)
                     if self.pause_for_plot:

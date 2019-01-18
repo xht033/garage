@@ -1,9 +1,9 @@
+# flake8: noqa
 import numpy as np
 import tensorflow as tf
 
-from garage.misc import logger, special
-from garage.sampler import parallel_sampler
-from garage.sampler import singleton_pool
+from garage.misc import special, tabular
+from garage.sampler import parallel_sampler, singleton_pool
 from garage.sampler.base import BaseSampler
 from garage.sampler.utils import truncate_paths
 from garage.tf.misc import tensor_utils
@@ -132,15 +132,15 @@ class BatchSampler(BaseSampler):
             average_return=np.mean(undiscounted_returns),
         )
 
-        logger.record_tabular('Iteration', itr)
-        logger.record_tabular('AverageDiscountedReturn',
-                              average_discounted_return)
-        logger.record_tabular('AverageReturn', np.mean(undiscounted_returns))
-        logger.record_tabular('NumTrajs', len(paths))
-        logger.record_tabular('Entropy', ent)
-        logger.record_tabular('Perplexity', np.exp(ent))
-        logger.record_tabular('StdReturn', np.std(undiscounted_returns))
-        logger.record_tabular('MaxReturn', np.max(undiscounted_returns))
-        logger.record_tabular('MinReturn', np.min(undiscounted_returns))
+        tabular.record_tabular('Iteration', itr)
+        tabular.record_tabular('AverageDiscountedReturn',
+                               average_discounted_return)
+        tabular.record_tabular('AverageReturn', np.mean(undiscounted_returns))
+        tabular.record_tabular('NumTrajs', len(paths))
+        tabular.record_tabular('Entropy', ent)
+        tabular.record_tabular('Perplexity', np.exp(ent))
+        tabular.record_tabular('StdReturn', np.std(undiscounted_returns))
+        tabular.record_tabular('MaxReturn', np.max(undiscounted_returns))
+        tabular.record_tabular('MinReturn', np.min(undiscounted_returns))
 
         return samples_data

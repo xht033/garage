@@ -1,3 +1,4 @@
+# flake8: noqa
 import math
 import os.path as osp
 import tempfile
@@ -9,13 +10,11 @@ import numpy as np
 
 from garage.core import Serializable
 from garage.envs import Step
-from garage.envs.mujoco.maze.maze_env_utils import construct_maze
-from garage.envs.mujoco.maze.maze_env_utils import point_distance
-from garage.envs.mujoco.maze.maze_env_utils import ray_segment_intersect
-from garage.envs.mujoco.mujoco_env import BIG
-from garage.envs.mujoco.mujoco_env import MODEL_DIR
+from garage.envs.mujoco.maze.maze_env_utils import construct_maze, \
+    point_distance, ray_segment_intersect
+from garage.envs.mujoco.mujoco_env import BIG, MODEL_DIR
 from garage.envs.util import flat_dim
-from garage.misc import logger
+from garage.misc import tabular
 from garage.misc.overrides import overrides
 
 
@@ -336,11 +335,11 @@ class MazeEnv(gym.Wrapper, Serializable):
         # we call here any logging related to the maze, strip the maze
         # obs and call log_diag with the stripped paths we need to log
         # the purely gather reward!!
-        with logger.tabular_prefix('Maze_'):
+        with tabular.tabular_prefix('Maze_'):
             gather_undiscounted_returns = [
                 sum(path['env_infos']['outer_rew']) for path in paths
             ]
-            logger.record_tabular_misc_stat(
+            tabular.record_tabular_misc_stat(
                 'Return', gather_undiscounted_returns, placement='front')
         stripped_paths = []
         for path in paths:
@@ -352,8 +351,9 @@ class MazeEnv(gym.Wrapper, Serializable):
             #  this breaks if the obs of the robot are d>1 dimensional (not a
             #  vector)
             stripped_paths.append(stripped_path)
-        with logger.tabular_prefix('wrapped_'):
+        with tabular.tabular_prefix('wrapped_'):
             wrapped_undiscounted_return = np.mean(
                 [np.sum(path['env_infos']['inner_rew']) for path in paths])
-            logger.record_tabular('AverageReturn', wrapped_undiscounted_return)
+            tabular.record_tabular('AverageReturn',
+                                   wrapped_undiscounted_return)
             self.env.log_diagnostics(stripped_paths, *args, **kwargs)

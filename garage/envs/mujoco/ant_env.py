@@ -1,3 +1,4 @@
+# flake8: noqa
 import math
 
 import numpy as np
@@ -5,9 +6,8 @@ import numpy as np
 from garage.core import Serializable
 from garage.envs import Step
 from garage.envs.mujoco import MujocoEnv
-from garage.envs.mujoco.mujoco_env import q_inv
-from garage.envs.mujoco.mujoco_env import q_mult
-from garage.misc import logger
+from garage.envs.mujoco.mujoco_env import q_inv, q_mult
+from garage.misc import tabular
 from garage.misc.overrides import overrides
 
 
@@ -65,7 +65,7 @@ class AntEnv(MujocoEnv, Serializable):
             path["observations"][-1][-3] - path["observations"][0][-3]
             for path in paths
         ]
-        logger.record_tabular('AverageForwardProgress', np.mean(progs))
-        logger.record_tabular('MaxForwardProgress', np.max(progs))
-        logger.record_tabular('MinForwardProgress', np.min(progs))
-        logger.record_tabular('StdForwardProgress', np.std(progs))
+        tabular.record_tabular('AverageForwardProgress', np.mean(progs))
+        tabular.record_tabular('MaxForwardProgress', np.max(progs))
+        tabular.record_tabular('MinForwardProgress', np.min(progs))
+        tabular.record_tabular('StdForwardProgress', np.std(progs))

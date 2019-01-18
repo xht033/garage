@@ -1,3 +1,4 @@
+# flake8: noqa
 import numpy as np
 import scipy.optimize
 import theano
@@ -5,8 +6,7 @@ import theano.tensor as TT
 
 from garage.algos import BatchPolopt
 from garage.core import Serializable
-from garage.misc import logger
-from garage.misc import tensor_utils
+from garage.misc import logger, tabular, tensor_utils
 from garage.misc.overrides import overrides
 from garage.theano.misc import tensor_utils as theano_tensor_utils
 
@@ -340,11 +340,11 @@ class REPS(BatchPolopt, Serializable):
 
         logger.log('eta %f -> %f' % (eta_before, self.param_eta))
 
-        logger.record_tabular("LossBefore", loss_before)
-        logger.record_tabular("LossAfter", loss_after)
-        logger.record_tabular('DualBefore', dual_before)
-        logger.record_tabular('DualAfter', dual_after)
-        logger.record_tabular('MeanKL', mean_kl)
+        tabular.record_tabular("LossBefore", loss_before)
+        tabular.record_tabular("LossAfter", loss_after)
+        tabular.record_tabular('DualBefore', dual_before)
+        tabular.record_tabular('DualAfter', dual_after)
+        tabular.record_tabular('MeanKL', mean_kl)
 
     @overrides
     def get_itr_snapshot(self, itr, samples_data):

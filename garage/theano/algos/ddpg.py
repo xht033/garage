@@ -1,6 +1,6 @@
 # flake8: noqa
-import pickle
 from functools import partial
+import pickle
 
 import lasagne
 import numpy as np
@@ -8,8 +8,8 @@ import pyprind
 import theano.tensor as TT
 
 from garage.algos import RLAlgorithm
-from garage.misc import ext, special
-from garage.misc.logger import logger
+from garage.misc import ext, snapshotter, special
+from garage.misc.logger import logger, tabular
 from garage.misc.overrides import overrides
 from garage.plotter import Plotter
 from garage.sampler import parallel_sampler
@@ -217,8 +217,8 @@ class DDPG(RLAlgorithm):
             if self.pool.n_transitions_stored >= self.min_pool_size:
                 self.evaluate(epoch, self.pool)
                 params = self.get_epoch_snapshot(epoch)
-                logger.save_itr_params(epoch, params)
-            logger.dump_tabular(with_prefix=False)
+                snapshotter.save_itr_params(epoch, params)
+            logger.log(tabular, with_prefix=False)
             logger.pop_prefix()
             if self.plot:
                 self.update_plot()
@@ -353,31 +353,31 @@ class DDPG(RLAlgorithm):
         qfun_reg_param_norm = np.linalg.norm(
             self.qf.get_param_values(regularizable=True))
 
-        logger.record_tabular('Epoch', epoch)
-        logger.record_tabular('AverageReturn', np.mean(returns))
-        logger.record_tabular('StdReturn', np.std(returns))
-        logger.record_tabular('MaxReturn', np.max(returns))
-        logger.record_tabular('MinReturn', np.min(returns))
+        tabular.record_tabular('Epoch', epoch)
+        tabular.record_tabular('AverageReturn', np.mean(returns))
+        tabular.record_tabular('StdReturn', np.std(returns))
+        tabular.record_tabular('MaxReturn', np.max(returns))
+        tabular.record_tabular('MinReturn', np.min(returns))
         if self.es_path_returns:
-            logger.record_tabular('AverageEsReturn',
-                                  np.mean(self.es_path_returns))
-            logger.record_tabular('StdEsReturn', np.std(self.es_path_returns))
-            logger.record_tabular('MaxEsReturn', np.max(self.es_path_returns))
-            logger.record_tabular('MinEsReturn', np.min(self.es_path_returns))
-        logger.record_tabular('AverageDiscountedReturn',
-                              average_discounted_return)
-        logger.record_tabular('AverageQLoss', average_q_loss)
-        logger.record_tabular('AveragePolicySurr', average_policy_surr)
-        logger.record_tabular('AverageQ', np.mean(all_qs))
-        logger.record_tabular('AverageAbsQ', np.mean(np.abs(all_qs)))
-        logger.record_tabular('AverageY', np.mean(all_ys))
-        logger.record_tabular('AverageAbsY', np.mean(np.abs(all_ys)))
-        logger.record_tabular('AverageAbsQYDiff',
-                              np.mean(np.abs(all_qs - all_ys)))
-        logger.record_tabular('AverageAction', average_action)
+            tabular.record_tabular('AverageEsReturn',
+                                   np.mean(self.es_path_returns))
+            tabular.record_tabular('StdEsReturn', np.std(self.es_path_returns))
+            tabular.record_tabular('MaxEsReturn', np.max(self.es_path_returns))
+            tabular.record_tabular('MinEsReturn', np.min(self.es_path_returns))
+        tabular.record_tabular('AverageDiscountedReturn',
+                               average_discounted_return)
+        tabular.record_tabular('AverageQLoss', average_q_loss)
+        tabular.record_tabular('AveragePolicySurr', average_policy_surr)
+        tabular.record_tabular('AverageQ', np.mean(all_qs))
+        tabular.record_tabular('AverageAbsQ', np.mean(np.abs(all_qs)))
+        tabular.record_tabular('AverageY', np.mean(all_ys))
+        tabular.record_tabular('AverageAbsY', np.mean(np.abs(all_ys)))
+        tabular.record_tabular('AverageAbsQYDiff',
+                               np.mean(np.abs(all_qs - all_ys)))
+        tabular.record_tabular('AverageAction', average_action)
 
-        logger.record_tabular('PolicyRegParamNorm', policy_reg_param_norm)
-        logger.record_tabular('QFunRegParamNorm', qfun_reg_param_norm)
+        tabular.record_tabular('PolicyRegParamNorm', policy_reg_param_norm)
+        tabular.record_tabular('QFunRegParamNorm', qfun_reg_param_norm)
 
         self.policy.log_diagnostics(paths)
 
