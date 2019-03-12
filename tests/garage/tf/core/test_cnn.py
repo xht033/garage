@@ -44,8 +44,9 @@ class TestCNN(TfGraphTestCase):
 
         result = self.sess.run(
             self.cnn, feed_dict={self._input_ph: self.obs_input})
-        # assert result.shape ==
-        print('test_output_shape: ', result.shape)
+
+        # (10-2-2) * (10-2-2) * 64 = 2304
+        assert result.shape == (self.batch_size, 2304)
 
     def test_output_with_identity_filter(self):
         with tf.variable_scope('CNN'):
