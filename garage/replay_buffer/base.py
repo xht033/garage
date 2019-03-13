@@ -27,6 +27,7 @@ class ReplayBuffer(metaclass=abc.ABCMeta):
         :param time_horizon: time horizon of rollout
         """
         self._current_size = 0
+        self._current_ptr = 0
         self._n_transitions_stored = 0
         self._time_horizon = time_horizon
         self._size = size_in_transitions // time_horizon
@@ -71,6 +72,27 @@ class ReplayBuffer(metaclass=abc.ABCMeta):
                 dtype=values.dtype)
         self._initialized_buffer = True
 
+    # def _get_storage_idx(self, size_increment=1):
+    #     """Get the storage index for the episode to add into the buffer."""
+    #     if self._current_size + size_increment <= self._size:
+    #         idx = np.arange(self._current_size,
+    #                         self._current_size + size_increment)
+    #     elif self._current_size < self._size:
+    #         overflow = size_increment - (self._size - self._current_size)
+    #         idx_a = np.arange(self._current_size, self._size)
+    #         idx_b = np.random.randint(0, self._current_size, overflow)
+    #         idx = np.concatenate([idx_a, idx_b])
+    #     else:
+    #         idx = np.random.randint(0, self._size, size_increment)
+
+    #     # Update replay size
+    #     self._current_size = min(self._size,
+    #                              self._current_size + size_increment)
+
+    #     if size_increment == 1:
+    #         idx = idx[0]
+    #     return idx
+
     def _get_storage_idx(self, size_increment=1):
         """Get the storage index for the episode to add into the buffer."""
         if self._current_size + size_increment <= self._size:
@@ -79,10 +101,22 @@ class ReplayBuffer(metaclass=abc.ABCMeta):
         elif self._current_size < self._size:
             overflow = size_increment - (self._size - self._current_size)
             idx_a = np.arange(self._current_size, self._size)
-            idx_b = np.random.randint(0, self._current_size, overflow)
+            # idx_b = np.random.randint(0, self._current_size, overflow)
+            idx_b = np.arange(0, overflow)
             idx = np.concatenate([idx_a, idx_b])
+            self._current_ptr = overflow
         else:
-            idx = np.random.randint(0, self._size, size_increment)
+            # idx = np.random.randint(0, self._size, size_increment)
+            if self._current_ptr + size_increment <= self._size:
+                idx = np.arange(self._current_ptr,
+                                self._current_ptr + size_increment)
+                self._current_ptr += size_increment
+            else:
+                overflow = size_increment - (self._size - self._current_size)
+                idx_a = np.arange(self._current_ptr, self._size)
+                idx_b = np.arange(0, overflow)
+                idx = np.concatenate([idx_a, idx_b])
+                self._current_ptr = overflow
 
         # Update replay size
         self._current_size = min(self._size,
