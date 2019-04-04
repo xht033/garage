@@ -52,7 +52,7 @@ def run_task(*_):
             qf_lr=1e-4,
             discount=1.0,
             min_buffer_size=1e3,
-            double_q=False,
+            double_q=True,
             target_network_update_freq=500,
             buffer_batch_size=32)
 

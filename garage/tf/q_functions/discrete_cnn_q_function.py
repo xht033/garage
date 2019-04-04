@@ -135,6 +135,7 @@ class DiscreteCNNQFunction(QFunction2):
             for model in self.models:
                 out = model.build(out)
 
+    @property
     def q_vals(self):
         """Q values."""
         return self.models[-1].networks['default'].outputs

@@ -27,7 +27,6 @@ class ReplayBuffer(metaclass=abc.ABCMeta):
         :param time_horizon: time horizon of rollout
         """
         self._current_size = 0
-        self._current_ptr = 0
         self._n_transitions_stored = 0
         self._time_horizon = time_horizon
         self._size = size_in_transitions // time_horizon
@@ -40,7 +39,6 @@ class ReplayBuffer(metaclass=abc.ABCMeta):
         episode_buffer = self._convert_episode_to_batch_major()
         rollout_batch_size = len(episode_buffer["observation"])
         idx = self._get_storage_idx(rollout_batch_size)
-
         for key in self._buffer.keys():
             self._buffer[key][idx] = episode_buffer[key]
         self._n_transitions_stored += self._time_horizon * rollout_batch_size
@@ -101,29 +99,27 @@ class ReplayBuffer(metaclass=abc.ABCMeta):
         elif self._current_size < self._size:
             overflow = size_increment - (self._size - self._current_size)
             idx_a = np.arange(self._current_size, self._size)
-            # idx_b = np.random.randint(0, self._current_size, overflow)
             idx_b = np.arange(0, overflow)
             idx = np.concatenate([idx_a, idx_b])
-            self._current_ptr = overflow
         else:
-            # idx = np.random.randint(0, self._size, size_increment)
             if self._current_ptr + size_increment <= self._size:
                 idx = np.arange(self._current_ptr,
                                 self._current_ptr + size_increment)
-                self._current_ptr += size_increment
             else:
-                overflow = size_increment - (self._size - self._current_size)
+                overflow = size_increment - (self._size - self._current_ptr)
                 idx_a = np.arange(self._current_ptr, self._size)
                 idx_b = np.arange(0, overflow)
                 idx = np.concatenate([idx_a, idx_b])
-                self._current_ptr = overflow
 
         # Update replay size
         self._current_size = min(self._size,
                                  self._current_size + size_increment)
+        # Update current pointer to last index
+        self._current_ptr = idx[-1] + 1
 
         if size_increment == 1:
             idx = idx[0]
+
         return idx
 
     def _convert_episode_to_batch_major(self):

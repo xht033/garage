@@ -95,7 +95,7 @@ class DQN(OffPolicyRLAlgorithm):
                 # Q-value of the selected action
                 action = tf.one_hot(self.action_t_ph, action_dim)
                 q_selected = tf.reduce_sum(
-                    self.qf.q_vals() * action,  # yapf: disable
+                    self.qf.q_vals * action,  # yapf: disable
                     axis=1)
 
                 # r + Q'(s', argmax_a(Q(s', _)) - Q(s, a)
@@ -105,21 +105,21 @@ class DQN(OffPolicyRLAlgorithm):
                     future_best_q_val_action = tf.argmax(
                         target_qval_with_online_q, 1)
                     future_best_q_val = tf.reduce_sum(
-                        self.target_qf.q_vals() * tf.one_hot(
+                        self.target_qf.q_vals * tf.one_hot(
                             future_best_q_val_action, action_dim),
                         axis=1)
                 else:
                     # r + max_a(Q'(s', _)) - Q(s, a)
                     future_best_q_val = tf.reduce_max(
-                        self.target_qf.q_vals(), axis=1)
+                        self.target_qf.q_vals, axis=1)
 
                 q_best_masked = (1.0 - self.done_t_ph) * future_best_q_val
                 # if done, it's just reward
                 # else reward + discount * future_best_q_val
                 target_q_values = self.reward_t_ph + self.discount * q_best_masked  # noqa: E501
 
-                td_error = tf.stop_gradient(target_q_values) - q_selected
-                loss = tf.square(td_error)
+                td_error = q_selected - tf.stop_gradient(target_q_values)
+                loss = huber_loss(td_error)
                 self._loss = tf.reduce_mean(loss)
 
             with tf.name_scope("optimize_ops"):
@@ -280,3 +280,11 @@ def get_target_ops(variables, target_variables):
         init_ops.append(tf.assign(target_var, var))
 
     return init_ops
+
+def huber_loss(x, delta=1.0):
+    """Reference: https://en.wikipedia.org/wiki/Huber_loss"""
+    return tf.where(
+        tf.abs(x) < delta,
+        tf.square(x) * 0.5,
+        delta * (tf.abs(x) - 0.5 * delta)
+    )

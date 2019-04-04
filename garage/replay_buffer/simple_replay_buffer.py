@@ -33,7 +33,7 @@ class SimpleReplayBuffer(ReplayBuffer):
 
         transitions = {}
         for key in buffer.keys():
-            samples = buffer[key][episode_idxs, t_samples].copy()
+            samples = buffer[key][episode_idxs, t_samples]
             transitions[key] = samples.reshape(batch_size, *samples.shape[1:])
 
         assert (transitions["action"].shape[0] == batch_size)

@@ -45,15 +45,15 @@ from baselines import deepq
 # Hyperparams for baselines and garage
 params = {
     "lr": 1e-4,
-    "num_timesteps": int(1e6),
+    "num_timesteps": int(1e7),
     "train_freq": 1,
     "discount": 0.99,
     "exploration_fraction": 0.1,
     "exploration_final_eps": 0.01,
-    "learning_starts": 10000,
-    "target_network_update_freq": 1000,
+    "learning_starts": int(1e5),
+    "target_network_update_freq": 2000,
     "dueling": False,
-    "buffer_size": int(1e5),
+    "buffer_size": int(5e4),
     "batch_size": 32
 }
 
@@ -69,14 +69,14 @@ class TestJson(unittest.TestCase):
         # https://github.com/openai/baselines/blob/master/baselines/bench/benchmarks.py
         atart_envs = benchmarks.get_benchmark("Atari10M")
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
-        benchmark_dir = "./benchmark_dqn/%s/" % timestamp
+        benchmark_dir = "./data/local/benchmarks/dqn/%s/" % timestamp
 
         result_json = {}
         result_json["time_start"] = timestamp
 
         atart_envs = {'tasks': [
-            {'desc': 'Qbert', 'env_id': 'QbertNoFrameskip-v4'},
-            {'desc': 'Seaquest', 'env_id': 'SeaquestNoFrameskip-v4'}
+        #     {'desc': 'Seaquest', 'env_id': 'SeaquestNoFrameskip-v4'},
+            {'desc': 'Qbert', 'env_id': 'QbertNoFrameskip-v4'}
         ]}
 
         for task in atart_envs["tasks"]:
@@ -101,15 +101,20 @@ class TestJson(unittest.TestCase):
             garage_dir = trail_dir + "/garage"
             baselines_dir = trail_dir + "/baselines"
 
-            # Run garage algorithms
-            garage_csv = run_garage(env, seed, garage_dir)
+            with tf.Graph().as_default():
+                # Run garage algorithms
+                # garage_csv = run_garage(env, seed, garage_dir)
 
-            # Run baselines algorithms
-            baselines_csv = run_baselines(env, seed, baselines_dir)
+                # Run baselines algorithms
+                baselines_csv = run_baselines(env, seed, baselines_dir)
 
-            garage_csvs.append(garage_csv)
-            baselines_csvs.append(baselines_csv)
+                # Run garage algorithms
+                # garage_csv = run_garage(env, seed, garage_dir)
 
+                # garage_csvs.append(garage_csv)
+                # baselines_csvs.append(baselines_csv)
+
+            """
             result_json[env_id] = create_json(
                 b_csvs=baselines_csvs,
                 g_csvs=garage_csvs,
@@ -119,10 +124,10 @@ class TestJson(unittest.TestCase):
                 g_y="AverageReturn",
                 b_x="steps",
                 b_y="mean 100 episode reward",
-                factor=1) 
+                factor=1000) 
 
         write_file(result_json, "DQN")
-
+    """
     test_json.huge = True
 
 
@@ -139,7 +144,7 @@ def run_garage(env, seed, log_dir):
     """
     deterministic.set_seed(seed)
 
-    with tf.Graph().as_default():
+    with tf.Session() as sess:
         env = TfEnv(normalize(env))
 
         replay_buffer = SimpleReplayBuffer(
@@ -154,7 +159,7 @@ def run_garage(env, seed, log_dir):
 
         epilson_greedy_strategy = EpsilonGreedyStrategy(
             env_spec=env.spec,
-            total_step=params['num_timesteps'],
+            total_timesteps=params['num_timesteps'],
             max_epsilon=1.0,
             min_epsilon=params['exploration_final_eps'],
             decay_ratio=params['exploration_fraction'])
@@ -166,7 +171,7 @@ def run_garage(env, seed, log_dir):
             exploration_strategy=epilson_greedy_strategy,
             replay_buffer=replay_buffer,
             max_path_length=1,
-            n_epochs=params['num_timesteps'],
+            num_timesteps=params['num_timesteps'],
             qf_lr=params['lr'],
             discount=params['discount'],
             grad_norm_clipping=10,
@@ -185,10 +190,10 @@ def run_garage(env, seed, log_dir):
         garage_logger.add_tabular_output(tabular_log_file)
         garage_logger.set_tensorboard_dir(tensorboard_log_dir)
 
-        algo.train()
+        algo.train(sess)
 
         garage_logger.remove_tabular_output(tabular_log_file)
-        return tabular_log_file
+    return tabular_log_file
 
 
 def run_baselines(env, seed, log_dir):
@@ -229,7 +234,7 @@ def run_baselines(env, seed, log_dir):
             target_network_update_freq=params['target_network_update_freq'],
             gamma=params['discount'],
             batch_size=params['batch_size'],
-            print_freq=1
+            print_freq=10
         )
 
         return osp.join(log_dir, "progress.csv")
