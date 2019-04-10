@@ -11,7 +11,7 @@ class OffPolicyRLAlgorithm(RLAlgorithm):
 
     def __init__(
             self,
-            env_spec,
+            env,
             policy,
             qf,
             replay_buffer,
@@ -29,7 +29,7 @@ class OffPolicyRLAlgorithm(RLAlgorithm):
             exploration_strategy=None,
     ):
         """Construct an OffPolicyRLAlgorithm class."""
-        self.env_spec = env_spec
+        self.env = env
         self.policy = policy
         self.qf = qf
         self.replay_buffer = replay_buffer

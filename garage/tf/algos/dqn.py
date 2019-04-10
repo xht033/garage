@@ -9,7 +9,7 @@ skipping frames and stacking frames as single observation.
 import numpy as np
 import tensorflow as tf
 
-from garage.misc import logger
+from garage.logger import logger, tabular
 from garage.misc.overrides import overrides
 from garage.tf.algos.off_policy_rl_algorithm import OffPolicyRLAlgorithm
 
@@ -95,7 +95,7 @@ class DQN(OffPolicyRLAlgorithm):
                 # Q-value of the selected action
                 action = tf.one_hot(self.action_t_ph, action_dim)
                 q_selected = tf.reduce_sum(
-                    self.qf.q_vals() * action,  # yapf: disable
+                    self.qf.q_vals * action,  # yapf: disable
                     axis=1)
 
                 # r + Q'(s', argmax_a(Q(s', _)) - Q(s, a)
@@ -105,13 +105,13 @@ class DQN(OffPolicyRLAlgorithm):
                     future_best_q_val_action = tf.argmax(
                         target_qval_with_online_q, 1)
                     future_best_q_val = tf.reduce_sum(
-                        self.target_qf.q_vals() * tf.one_hot(
+                        self.target_qf.q_vals * tf.one_hot(
                             future_best_q_val_action, action_dim),
                         axis=1)
                 else:
                     # r + max_a(Q'(s', _)) - Q(s, a)
                     future_best_q_val = tf.reduce_max(
-                        self.target_qf.q_vals(), axis=1)
+                        self.target_qf.q_vals, axis=1)
 
                 q_best_masked = (1.0 - self.done_t_ph) * future_best_q_val
                 # if done, it's just reward
@@ -170,7 +170,7 @@ class DQN(OffPolicyRLAlgorithm):
             obs = np.asarray(obs)
         episode_rewards.append(0.)
 
-        for itr in range(self.num_timesteps):
+        for itr in range(1, self.num_timesteps + 1):
             with logger.prefix('Iteration #%d | ' % itr):
                 # normalize observation for pixel environment
                 if len(self.env.spec.observation_space.shape) == 3:
@@ -215,29 +215,29 @@ class DQN(OffPolicyRLAlgorithm):
                     if itr % self.target_network_update_freq == 0:
                         self.sess.run(self._qf_update_ops, feed_dict=dict())
 
-                if self.plot:
-                    self.plotter.update_plot(self.policy, self.max_path_length)
-                    if self.pause_for_plot:
-                        input("Plotting evaluation run: Press Enter to "
-                              "continue...")
+                # if self.plot:
+                #     self.plotter.update_plot(self.policy, self.max_path_length)
+                #     if self.pause_for_plot:
+                #         input("Plotting evaluation run: Press Enter to "
+                #               "continue...")
 
                 if self.evaluate:
                     mean100ep_rewards = round(
                         np.mean(episode_rewards[-100:]), 1)
                     mean100ep_qf_loss = np.mean(episode_qf_losses[-100:])
                     if itr % self.print_freq == 0:
-                        logger.record_tabular('Iteration', itr)
-                        logger.record_tabular('AverageReturn',
+                        tabular.record('Iteration', itr)
+                        tabular.record('AverageReturn',
                                               mean100ep_rewards)
-                        logger.record_tabular('StdReturn',
+                        tabular.record('StdReturn',
                                               np.std(episode_rewards))
-                        logger.record_tabular('QFunction/AverageQFunctionLoss',
+                        tabular.record('QFunction/AverageQFunctionLoss',
                                               mean100ep_qf_loss)
-                        logger.record_tabular('EpisodeLength',
+                        tabular.record('EpisodeLength',
                                               np.mean(episode_length))
 
-                logger.dump_tabular(with_prefix=False)
-
+                        print(itr, np.mean(episode_rewards), mean100ep_rewards)
+                logger.dump_all(itr)
         if created_session:
             self.sess.close()
 

@@ -4,8 +4,10 @@ too low.
 """
 import gym
 
-from garage.exploration_strategies import EpsilonGreedyStrategy
-import garage.misc.logger as logger
+from garage.np.exploration_strategies import EpsilonGreedyStrategy
+from garage.logger import logger
+from garage.logger import StdOutput
+from garage.logger import TensorBoardOutput
 from garage.replay_buffer import SimpleReplayBuffer
 from garage.tf.algos import DQN
 from garage.tf.envs import TfEnv
@@ -16,15 +18,16 @@ from tests.fixtures import TfGraphTestCase
 
 class TestDQN(TfGraphTestCase):
     def test_dqn_cartpole(self):
+        # logger.add_output(TensorBoardOutput('...'))
+        logger.add_output(StdOutput())
         """Test DQN with CartPole environment."""
-        logger.reset()
         max_path_length = 1
-        num_timesteps = 20000
+        num_timesteps = 100000
 
         env = TfEnv(gym.make("CartPole-v0"))
         replay_buffer = SimpleReplayBuffer(
             env_spec=env.spec,
-            size_in_transitions=int(5000),
+            size_in_transitions=int(1e4),
             time_horizon=max_path_length)
         qf = DiscreteMLPQFunction(env_spec=env.spec, hidden_sizes=(64, 64))
         policy = DiscreteQfDerivedPolicy(env_spec=env, qf=qf)
@@ -44,7 +47,7 @@ class TestDQN(TfGraphTestCase):
             num_timesteps=num_timesteps,
             qf_lr=1e-4,
             discount=1.0,
-            min_buffer_size=1e3,
+            min_buffer_size=int(1e3),
             double_q=False,
             target_network_update_freq=500,
             buffer_batch_size=32)
