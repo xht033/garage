@@ -54,11 +54,11 @@ class DiscreteCNNQFunction(QFunction2):
                  pool_shapes=(2, 2),
                  cnn_hidden_nonlinearity=tf.nn.relu,
                  hidden_nonlinearity=tf.nn.relu,
-                 hidden_w_init=tf.contrib.layers.xavier_initializer,
-                 hidden_b_init=tf.zeros_initializer,
+                 hidden_w_init=tf.glorot_uniform_initializer(),
+                 hidden_b_init=tf.zeros_initializer(),
                  output_nonlinearity=None,
-                 output_w_init=tf.contrib.layers.xavier_initializer,
-                 output_b_init=tf.zeros_initializer,
+                 output_w_init=tf.glorot_uniform_initializer(),
+                 output_b_init=tf.zeros_initializer(),
                  dueling=False,
                  layer_normalization=False):
         super().__init__(name)
@@ -135,6 +135,7 @@ class DiscreteCNNQFunction(QFunction2):
             for model in self.models:
                 out = model.build(out)
 
+    @property
     def q_vals(self):
         """Q values."""
         return self.models[-1].networks['default'].outputs

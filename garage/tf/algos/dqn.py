@@ -227,17 +227,19 @@ class DQN(OffPolicyRLAlgorithm):
                     mean100ep_qf_loss = np.mean(episode_qf_losses[-100:])
                     if itr % self.print_freq == 0:
                         tabular.record('Iteration', itr)
-                        tabular.record('AverageReturn',
+                        tabular.record('AverageReturn', np.mean(episode_rewards))
+                        tabular.record('Episode100RewardMean',
                                               mean100ep_rewards)
                         tabular.record('StdReturn',
                                               np.std(episode_rewards))
-                        tabular.record('QFunction/AverageQFunctionLoss',
+                        tabular.record('Episode100LossMean',
                                               mean100ep_qf_loss)
+                        tabular.record('QFunction/AverageQFunctionLoss',
+                                              np.mean(episode_qf_losses))
                         tabular.record('EpisodeLength',
                                               np.mean(episode_length))
-
-                        print(itr, np.mean(episode_rewards), mean100ep_rewards)
-                logger.dump_all(itr)
+                        logger.log(tabular)
+                        logger.dump_all(itr)
         if created_session:
             self.sess.close()
 

@@ -16,7 +16,7 @@ from garage.envs.wrappers.noop import Noop
 from garage.envs.wrappers.resize import Resize
 from garage.envs.wrappers.stack_frames import StackFrames
 from garage.experiment import run_experiment
-from garage.exploration_strategies import EpsilonGreedyStrategy
+from garage.np.exploration_strategies import EpsilonGreedyStrategy
 from garage.replay_buffer import SimpleReplayBuffer
 from garage.tf.algos import DQN
 from garage.tf.envs import TfEnv
