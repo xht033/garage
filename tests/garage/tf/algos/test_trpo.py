@@ -73,3 +73,32 @@ class TestTRPO(TfGraphTestCase):
         assert 'Unknown KLConstraint' in str(context.exception)
 
         env.close()
+
+    def test_trpo_soft_kl_constraint(self):
+        """Test TRPO with unkown KL constraints."""
+        with LocalRunner(self.sess) as runner:
+            env = TfEnv(normalize(gym.make('InvertedDoublePendulum-v2')))
+            policy = GaussianMLPPolicy(
+                env_spec=env.spec,
+                hidden_sizes=(64, 64),
+                hidden_nonlinearity=tf.nn.tanh,
+                output_nonlinearity=None,
+            )
+            baseline = GaussianMLPBaseline(
+                env_spec=env.spec,
+                regressor_args=dict(hidden_sizes=(32, 32)),
+            )
+            algo = TRPO(
+                env_spec=env.spec,
+                policy=policy,
+                baseline=baseline,
+                max_path_length=100,
+                discount=0.99,
+                gae_lambda=0.98,
+                policy_ent_coeff=0.0,
+                kl_constraint='soft')
+            runner.setup(algo, env)
+            last_avg_ret = runner.train(n_epochs=10, batch_size=2048)
+            assert last_avg_ret > 50
+
+            env.close()
