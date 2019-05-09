@@ -11,7 +11,6 @@ import tensorflow as tf
 
 from garage.misc.overrides import overrides
 from garage.tf.algos import DDPG
-from garage.tf.misc import tensor_utils
 
 
 class TD3(DDPG):
@@ -153,15 +152,6 @@ class TD3(DDPG):
                 target_init_op2 = policy_init_ops + qf2_init_ops
                 target_update_op2 = (policy_update_ops + qf2_update_ops)
 
-            f_init_target = tensor_utils.compile_function(
-                inputs=[], outputs=target_init_op)
-            f_update_target = tensor_utils.compile_function(
-                inputs=[], outputs=target_update_op)
-            f_init_target2 = tensor_utils.compile_function(
-                inputs=[], outputs=target_init_op2)
-            f_update_target2 = tensor_utils.compile_function(
-                inputs=[], outputs=target_update_op2)
-
             with tf.name_scope('inputs'):
                 if self.input_include_goal:
                     obs_dim = self.env_spec.observation_space.\
@@ -199,9 +189,6 @@ class TD3(DDPG):
                     self.policy_lr, name='PolicyOptimizer').minimize(
                         action_loss, var_list=self.policy.get_trainable_vars())
 
-            f_train_policy = tensor_utils.compile_function(
-                inputs=[obs], outputs=[policy_train_op, action_loss])
-
             # Set up qf training function
             qval = self.qf.get_qval_sym(obs, actions, name='q_value')
             q2val = self.qf2.get_qval_sym(obs, actions, name='q2_value')
@@ -223,20 +210,28 @@ class TD3(DDPG):
                     self.qf_lr, name='QFunctionOptimizer').minimize(
                         qval_loss, var_list=self.qf2.get_trainable_vars())
 
-            f_train_qf = tensor_utils.compile_function(
-                inputs=[y, obs, actions],
-                outputs=[qf_train_op, qval_loss, qval])
-            f_train_qf2 = tensor_utils.compile_function(
-                inputs=[y, obs, actions],
-                outputs=[qf2_train_op, qval_loss, q2val])
+            self.f_train_policy = tf.get_default_session().make_callable(
+                fetches=[policy_train_op, action_loss], feed_list=[obs])
 
-            self.f_train_policy = f_train_policy
-            self.f_train_qf = f_train_qf
-            self.f_init_target = f_init_target
-            self.f_update_target = f_update_target
-            self.f_train_qf2 = f_train_qf2
-            self.f_init_target2 = f_init_target2
-            self.f_update_target2 = f_update_target2
+            self.f_train_qf = tf.get_default_session().make_callable(
+                fetches=[qf_train_op, qval_loss, qval],
+                feed_list=[y, obs, actions])
+
+            self.f_init_target = tf.get_default_session().make_callable(
+                target_init_op)
+
+            self.f_update_target = tf.get_default_session().make_callable(
+                target_update_op)
+
+            self.f_train_qf2 = tf.get_default_session().make_callable(
+                fetches=[qf2_train_op, qval_loss, q2val],
+                feed_list=[y, obs, actions])
+
+            self.f_init_target2 = tf.get_default_session().make_callable(
+                target_init_op2)
+
+            self.f_update_target2 = tf.get_default_session().make_callable(
+                target_update_op2)
 
     @overrides
     def optimize_policy(self, itr, samples_data):
