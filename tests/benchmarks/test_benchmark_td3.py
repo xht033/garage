@@ -20,7 +20,10 @@ import tensorflow as tf
 
 from garage.experiment import deterministic
 from garage.experiment import LocalRunner
+from garage.logger import CsvOutput
 from garage.logger import logger as garage_logger
+from garage.logger import StdOutput
+from garage.logger import TensorBoardOutput
 from garage.np.exploration_strategies import OUStrategy
 from garage.replay_buffer import SimpleReplayBuffer
 from garage.tf.algos import TD3
@@ -138,7 +141,7 @@ def run_garage(env, seed, log_dir):
                 time_horizon=params['n_rollout_steps'])
 
             td3 = TD3(
-                env,
+                env.spec,
                 policy=policy,
                 qf=qf,
                 qf2=qf2,
@@ -160,15 +163,16 @@ def run_garage(env, seed, log_dir):
             # Set up logger since we are not using run_experiment
             tabular_log_file = osp.join(log_dir, 'progress.csv')
             tensorboard_log_dir = osp.join(log_dir)
-            garage_logger.add_tabular_output(tabular_log_file)
-            garage_logger.set_tensorboard_dir(tensorboard_log_dir)
+            garage_logger.add_output(StdOutput())
+            garage_logger.add_output(CsvOutput(tabular_log_file))
+            garage_logger.add_output(TensorBoardOutput(tensorboard_log_dir))
 
             runner.setup(td3, env)
             runner.train(
                 n_epochs=params['n_epochs'],
                 n_epoch_cycles=params['n_epoch_cycles'])
 
-            garage_logger.remove_tabular_output(tabular_log_file)
+            garage_logger.remove_all()
 
             return tabular_log_file
 
