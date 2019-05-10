@@ -126,7 +126,7 @@ class TD3(DDPG):
 
     @overrides
     def init_opt(self):
-        """Init the optimizer."""
+        """Build the loss function and init the optimizer."""
         with tf.name_scope(self.name, 'TD3'):
             # Create target policy (actor) and qf (critic) networks
             self.target_policy_f_prob_online, _, _ = self.policy.build_net(
