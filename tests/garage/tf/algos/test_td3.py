@@ -62,6 +62,8 @@ class TestTD3(TfGraphTestCase):
                 smooth_return=False,
                 min_buffer_size=int(1e4),
                 buffer_batch_size=100,
+                policy_weight_decay=0.001,
+                qf_weight_decay=0.001,
                 exploration_strategy=action_noise,
                 policy_optimizer=tf.train.AdamOptimizer,
                 qf_optimizer=tf.train.AdamOptimizer)

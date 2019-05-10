@@ -67,9 +67,9 @@ class TD3(DDPG):
                 of the policy network.
             qf_weight_decay(float): L2 weight decay factor for parameters
                 of the q value network.
-            policy_optimizer(tf.train.Optimizer):
+            policy_optimizer(tf.python.training.optimizer.Optimizer):
                 Optimizer for training policy network.
-            qf_optimizer(tf.train.Optimizer):
+            qf_optimizer(tf.python.training.optimizer.Optimizer):
                 Optimizer for training q function network.
             clip_pos_returns(boolean): Whether or not clip positive returns.
             clip_return(float): Clip return to be in [-clip_return,
