@@ -20,11 +20,50 @@ from garage.tf.misc import tensor_utils
 
 
 class DDPG(OffPolicyRLAlgorithm):
-    """
-    A DDPG model based on https://arxiv.org/pdf/1509.02971.pdf.
+    """A DDPG model based on https://arxiv.org/pdf/1509.02971.pdf.
 
     Example:
         $ python garage/examples/tf/ddpg_pendulum.py
+
+    Args:
+        env_spec(garage.envs.EnvSpec): Environment specification.
+        policy(garage.tf.policies.base.Policy): Policy.
+        qf(garage.tf.q_functions.QFunction): Q-function.
+        replay_buffer(garage.replay_buffer.base.ReplayBuffer):
+            Replay buffer.
+        target_update_tau(float): Interpolation parameter for doing the
+            soft target update.
+        policy_lr(float): Learning rate for training policy network.
+        qf_lr(float): Learning rate for training q value network.
+        policy_weight_decay(float): L2 weight decay factor for parameters
+            of the policy network.
+        qf_weight_decay(float): L2 weight decay factor for parameters
+            of the q value network.
+        policy_optimizer(): Optimizer for training policy network.
+        qf_optimizer(): Optimizer for training q function network.
+        clip_pos_returns(boolean): Whether or not clip positive returns.
+        clip_return(float): Clip return to be in [-clip_return,
+            clip_return].
+        discount(float): Discount factor for the cumulative return.
+        max_action(float): Maximum action magnitude.
+        name(str): Name of the algorithm shown in computation graph.
+        n_epoch_cycles(int): Number of batches of samples in each epoch.
+        max_path_length(int): Maximum length of a path.
+        n_train_steps(int): Number of optimizations in each epoch cycle.
+        buffer_batch_size(int): Size of replay buffer.
+        min_buffer_size(int):
+            Number of samples in replay buffer before first optimization.
+        rollout_batch_size(int):
+        reward_scale(float): Scale to reward.
+        input_include_goal(bool):
+            True if the environment entails a goal in observation.
+        smooth_return(bool):
+            If True, do statistics on all samples collection.
+            Otherwise do statistics on one batch.
+        exploration_strategy(
+            garage.np.exploration_strategies.ExplorationStrategy):
+            Exploration strategy.
+
     """
 
     def __init__(self,
@@ -54,49 +93,6 @@ class DDPG(OffPolicyRLAlgorithm):
                  input_include_goal=False,
                  smooth_return=True,
                  exploration_strategy=None):
-        """
-        Construct class.
-
-        Args:
-            env_spec(garage.envs.EnvSpec): Environment specification.
-            policy(garage.tf.policies.base.Policy): Policy.
-            qf(garage.tf.q_functions.QFunction): Q-function.
-            replay_buffer(garage.replay_buffer.base.ReplayBuffer):
-                Replay buffer.
-            target_update_tau(float): Interpolation parameter for doing the
-                soft target update.
-            policy_lr(float): Learning rate for training policy network.
-            qf_lr(float): Learning rate for training q value network.
-            policy_weight_decay(float): L2 weight decay factor for parameters
-                of the policy network.
-            qf_weight_decay(float): L2 weight decay factor for parameters
-                of the q value network.
-            policy_optimizer(): Optimizer for training policy network.
-            qf_optimizer(): Optimizer for training q function network.
-            clip_pos_returns(boolean): Whether or not clip positive returns.
-            clip_return(float): Clip return to be in [-clip_return,
-                clip_return].
-            discount(float): Discount factor for the cumulative return.
-            max_action(float): Maximum action magnitude.
-            name(str): Name of the algorithm shown in computation graph.
-            n_epoch_cycles(int): Number of batches of samples in each epoch.
-            max_path_length(int): Maximum length of a path.
-            n_train_steps(int): Number of optimizations in each epoch cycle.
-            buffer_batch_size(int): Size of replay buffer.
-            min_buffer_size(int):
-                Number of samples in replay buffer before first optimization.
-            rollout_batch_size(int):
-            reward_scale(float): Scale to reward.
-            input_include_goal(bool):
-                True if the environment entails a goal in observation.
-            smooth_return(bool):
-                If True, do statistics on all samples collection.
-                Otherwise do statistics on one batch.
-            exploration_strategy(
-                garage.np.exploration_strategies.ExplorationStrategy):
-                Exploration strategy.
-
-        """
         action_bound = env_spec.action_space.high
         self.max_action = action_bound if max_action is None else max_action
         self.tau = target_update_tau
@@ -273,14 +269,17 @@ class DDPG(OffPolicyRLAlgorithm):
 
     @overrides
     def optimize_policy(self, itr, samples_data):
-        """
-        Perform algorithm optimizing.
+        """Perform algorithm optimizing.
+
+        Args:
+            itr(int): Iterations.
+            samples_data(list): Processed batch data.
 
         Returns:
-            action_loss: Loss of action predicted by the policy network.
-            qval_loss: Loss of q value predicted by the q network.
-            ys: y_s.
-            qval: Q value predicted by the q network.
+            action_loss(float): Loss of action predicted by the policy network.
+            qval_loss(float): Loss of q value predicted by the q network.
+            ys(float): y_s.
+            qval(float): Q value predicted by the q network.
 
         """
         transitions = self.replay_buffer.sample(self.buffer_batch_size)

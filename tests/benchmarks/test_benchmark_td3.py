@@ -66,6 +66,7 @@ class TestBenchmarkTD3(unittest.TestCase):
 
         for task in mujoco1m['tasks']:
             env_id = task['env_id']
+            print('Env:', env_id)
             env = gym.make(env_id)
             seeds = random.sample(range(100), task['trials'])
 
