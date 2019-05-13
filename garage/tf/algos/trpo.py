@@ -22,7 +22,7 @@ class TRPO(NPO):
             elif kl_constraint == 'soft':
                 optimizer = PenaltyLbfgsOptimizer
             else:
-                raise NotImplementedError('Unknown KLConstraint')
+                raise ValueError('Invalid kl_constraint')
 
         if optimizer_args is None:
             optimizer_args = dict()

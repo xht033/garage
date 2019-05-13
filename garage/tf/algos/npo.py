@@ -87,25 +87,9 @@ class NPO(BatchPolopt):
                 optimizer_args = dict()
             optimizer = LbfgsOptimizer
 
-        if entropy_method == 'max':
-            assert not center_adv and stop_entropy_gradient, (
-                'center_adv should be False and stop_gradient should be True '
-                'when entropy_method is max')
-            self._maximum_entropy = True
-            self._entropy_regularzied = False
-        elif entropy_method == 'regularized':
-            assert not use_neg_logli_entropy and not stop_entropy_gradient, (
-                'use_neg_logli_entropy and stop_entropy_gradient should be '
-                'False when entropy_method is regularized')
-            self._maximum_entropy = False
-            self._entropy_regularzied = True
-        elif entropy_method == 'no_entropy':
-            assert policy_ent_coeff == 0.0, ('policy_ent_coeff should be zero '
-                                             'when there is no entropy method')
-            self._maximum_entropy = False
-            self._entropy_regularzied = False
-        else:
-            raise ValueError('Invalid entropy_method')
+        self._check_entropy_configuration(
+            entropy_method, center_adv, stop_entropy_gradient,
+            use_neg_logli_entropy, policy_ent_coeff)
 
         if pg_loss not in ['vanilla', 'surrogate', 'surrogate_clip']:
             raise ValueError('Invalid pg_loss')
@@ -577,3 +561,33 @@ class NPO(BatchPolopt):
         )
 
         return flatten_inputs(policy_opt_input_values)
+
+    def _check_entropy_configuration(self, entropy_method, center_adv,
+                                     stop_entropy_gradient,
+                                     use_neg_logli_entropy, policy_ent_coeff):
+        if entropy_method == 'max':
+            if center_adv:
+                raise ValueError('center_adv should be False when '
+                                 'entropy_method is max')
+            if not stop_entropy_gradient:
+                raise ValueError('stop_gradient should be True when '
+                                 'entropy_method is max')
+            self._maximum_entropy = True
+            self._entropy_regularzied = False
+        elif entropy_method == 'regularized':
+            if use_neg_logli_entropy:
+                raise ValueError('use_neg_logli_entropy should be False '
+                                 'when entropy_method is regularized')
+            if stop_entropy_gradient:
+                raise ValueError('stop_entropy_gradient should be False '
+                                 'when entropy_method is regularized')
+            self._maximum_entropy = False
+            self._entropy_regularzied = True
+        elif entropy_method == 'no_entropy':
+            if policy_ent_coeff != 0.0:
+                raise ValueError('policy_ent_coeff should be zero '
+                                 'when there is no entropy method')
+            self._maximum_entropy = False
+            self._entropy_regularzied = False
+        else:
+            raise ValueError('Invalid entropy_method')
