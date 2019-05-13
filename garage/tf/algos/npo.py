@@ -25,39 +25,38 @@ class NPO(BatchPolopt):
     Natural Policy Gradient Optimization.
 
     Args:
-        pg_loss (str, optional): A string from: 'vanilla', 'surrogate',
+        pg_loss (str): A string from: 'vanilla', 'surrogate',
             'surrogate_clip'. The type of loss functions to use.
-        lr_clip_range (float, optional): The limit on the likelihood ratio
-            between policies, as in PPO.
-        max_kl_step (float, optional): The maximum KL divergence between old
-            and new policies, as in TRPO.
-        optimizer (object, optional): The optimizer of the algorithm. Should
-            be the optimizers in garage.tf.optimizers.
-        optimizer_args (dict, optional): The arguments of the optimizer.
-        name (str, optional): The name of the algorithm.
-        policy_ent_coeff (float, optional): The coefficient of the policy
-            entropy. Setting it to zero would mean no entropy regularization.
-        entropy_method (str, optional): A string from: 'max', 'regularized',
+        lr_clip_range (float): The limit on the likelihood ratio between
+            policies, as in PPO.
+        max_kl_step (float): The maximum KL divergence between old and new
+            policies, as in TRPO.
+        optimizer (object): The optimizer of the algorithm. Should be the
+            optimizers in garage.tf.optimizers.
+        optimizer_args (dict): The arguments of the optimizer.
+        name (str): The name of the algorithm.
+        policy_ent_coeff (float): The coefficient of the policy entropy.
+            Setting it to zero would mean no entropy regularization.
+        entropy_method (str): A string from: 'max', 'regularized',
             'no_entropy'. The type of entropy method to use. 'max' adds the
             dense entropy to the reward for each time step. 'regularized' adds
             the mean entropy to the surrogate objective. See
             https://arxiv.org/abs/1805.00909 for more details.
-        use_neg_logli_entropy (bool, optional): Whether to estimate the
-            entropy as the negative log likelihood of the action.
-        use_softplus_entropy (bool, optional): Whether to estimate the softmax
+        use_neg_logli_entropy (bool): Whether to estimate the entropy as the
+            negative log likelihood of the action.
+        use_softplus_entropy (bool): Whether to estimate the softmax
             distribution of the entropy to prevent the entropy from being
             negative.
-        stop_entropy_gradient (bool, optional): Whether to stop the entropy
-            gradient.
+        stop_entropy_gradient (bool): Whether to stop the entropy gradient.
 
     Note:
         sane defaults for entropy configuration:
             - entropy_method='max', center_adv=False, stop_gradient=True
-              (`center_adv`normalizes the advantages tensor, which will
+              (center_adv normalizes the advantages tensor, which will
               significantly alleviate the effect of entropy. It is also
               recommended to turn off entropy gradient so that the agent
               will focus on high-entropy actions instead of increasing the
-              variance of the distribution.
+              variance of the distribution.)
 
             - entropy_method='regularized', stop_gradient=False,
               use_neg_logli_entropy=False
@@ -107,6 +106,9 @@ class NPO(BatchPolopt):
             self._entropy_regularzied = False
         else:
             raise ValueError('Invalid entropy_method')
+
+        if pg_loss not in ['vanilla', 'surrogate', 'surrogate_clip']:
+            raise ValueError('Invalid pg_loss')
 
         with self._name_scope:
             self.optimizer = optimizer(**optimizer_args)
@@ -413,8 +415,6 @@ class NPO(BatchPolopt):
                     else:
                         surr_clip = lr_clip * adv_valid
                     obj = tf.minimum(surrogate, surr_clip, name='surr_obj')
-                else:
-                    raise NotImplementedError('Unknown PGLoss')
 
                 if self._entropy_regularzied:
                     obj += self.policy_ent_coeff * policy_entropy
