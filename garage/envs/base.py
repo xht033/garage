@@ -20,8 +20,8 @@ from garage.envs.env_spec import EnvSpec
 # points don't close their viewer windows.
 KNOWN_GYM_NOT_CLOSE_VIEWER = [
     # Please keep alphabetized
-    "gym.envs.mujoco",
-    "gym.envs.robotics"
+    'gym.envs.mujoco',
+    'gym.envs.robotics'
 ]
 
 
@@ -41,7 +41,7 @@ class GarageEnv(gym.Wrapper, Serializable):
     Args: env (gym.Env): the env that will be wrapped
     """
 
-    def __init__(self, env=None, env_name=""):
+    def __init__(self, env=None, env_name=''):
         if env_name:
             super().__init__(gym.make(env_name))
         else:
@@ -50,6 +50,13 @@ class GarageEnv(gym.Wrapper, Serializable):
         self.action_space = self._to_akro_space(self.env.action_space)
         self.observation_space = self._to_akro_space(
             self.env.observation_space)
+        if self.spec:
+            self.spec.action_space = self.action_space
+            self.spec.observation_space = self.observation_space
+        else:
+            self.spec = EnvSpec(
+                action_space=self.action_space,
+                observation_space=self.observation_space)
 
         Parameterized.__init__(self)
         Serializable.quick_init(self, locals())
@@ -82,29 +89,17 @@ class GarageEnv(gym.Wrapper, Serializable):
                 # This import is not in the header to avoid a MuJoCo dependency
                 # with non-MuJoCo environments that use this base class.
                 from mujoco_py.mjviewer import MjViewer
-                if (hasattr(self.env, "viewer")
+                if (hasattr(self.env, 'viewer')
                         and isinstance(self.env.viewer, MjViewer)):
                     glfw.destroy_window(self.env.viewer.window)
                 else:
                     env_itr = self.env
-                    while hasattr(env_itr, "env"):
+                    while hasattr(env_itr, 'env'):
                         env_itr = env_itr.env
-                        if (hasattr(env_itr, "viewer")
+                        if (hasattr(env_itr, 'viewer')
                                 and isinstance(env_itr.viewer, MjViewer)):
                             glfw.destroy_window(env_itr.viewer.window)
                             break
-
-    @property
-    def spec(self):
-        """
-        Returns an EnvSpec with akro.spaces.
-
-        Returns:
-            spec (garage.envs.EnvSpec)
-        """
-        return EnvSpec(
-            observation_space=self.observation_space,
-            action_space=self.action_space)
 
     def reset(self, **kwargs):
         """
@@ -156,5 +151,5 @@ def Step(observation, reward, done, **kwargs):  # noqa: N802
     return _Step(observation, reward, done, kwargs)
 
 
-_Step = collections.namedtuple("Step",
-                               ["observation", "reward", "done", "info"])
+_Step = collections.namedtuple('Step',
+                               ['observation', 'reward', 'done', 'info'])
