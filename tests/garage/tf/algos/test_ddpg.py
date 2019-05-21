@@ -11,6 +11,7 @@ from garage.replay_buffer import SimpleReplayBuffer
 from garage.tf.algos import DDPG
 from garage.tf.envs import TfEnv
 from garage.tf.policies import ContinuousMLPPolicy
+from garage.tf.policies import ContinuousMLPPolicyWithModel
 from garage.tf.q_functions import ContinuousMLPQFunction
 from tests.fixtures import TfGraphTestCase
 
@@ -21,11 +22,20 @@ class TestDDPG(TfGraphTestCase):
         with LocalRunner(self.sess) as runner:
             env = TfEnv(gym.make('InvertedDoublePendulum-v2'))
             action_noise = OUStrategy(env.spec, sigma=0.2)
-            policy = ContinuousMLPPolicy(
+            policy2 = ContinuousMLPPolicy(
                 env_spec=env.spec,
                 hidden_sizes=[64, 64],
                 hidden_nonlinearity=tf.nn.relu,
                 output_nonlinearity=tf.nn.tanh)
+            self.sess.run(tf.global_variables_initializer())
+            policy = ContinuousMLPPolicyWithModel(
+                env_spec=env.spec,
+                name='AnotherPolicy',
+                hidden_sizes=[64, 64],
+                hidden_nonlinearity=tf.nn.relu,
+                output_nonlinearity=tf.nn.tanh)
+            for p, p2 in zip(policy.get_trainable_vars(), policy2.get_trainable_vars()):
+                p.load(p2.eval())
             qf = ContinuousMLPQFunction(
                 env_spec=env.spec,
                 hidden_sizes=[64, 64],
@@ -50,6 +60,7 @@ class TestDDPG(TfGraphTestCase):
             runner.setup(algo, env)
             last_avg_ret = runner.train(
                 n_epochs=10, n_epoch_cycles=20, batch_size=100)
+            print(last_avg_ret)
             assert last_avg_ret > 60
 
             env.close()

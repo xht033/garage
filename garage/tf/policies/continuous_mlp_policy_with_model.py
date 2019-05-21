@@ -97,15 +97,17 @@ class ContinuousMLPPolicyWithModel(Policy2):
             self._variable_scope = vs
             self.model.build(state_input)
 
+        actions = tf.multiply(self.model.networks['default'].outputs,
+            self.action_space.high)
         self._f_prob = tf.get_default_session().make_callable(
-            self.model.networks['default'].outputs,
+            actions,
             feed_list=[self.model.networks['default'].input])
 
     def get_action_sym(self, obs_var, name=None, **kwargs):
         """Return action sym according to obs_var."""
         with tf.variable_scope(self._variable_scope):
             action = self.model.build(obs_var, name=name)
-            return action
+            return tf.multiply(action, self.action_space.high)
 
     @overrides
     def get_action(self, observation):
