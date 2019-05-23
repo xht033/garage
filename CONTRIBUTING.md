@@ -34,9 +34,116 @@ The Python code in garage conforms to the [PEP8](https://www.python.org/dev/peps
 
 ### garage-specific Python style
 These are garage-specific rules which are not part of the aforementioned style guides.
-* Python package imports should be sorted alphabetically within their PEP8 groupings. The sorting is alphabetical from left to right, ignoring case and Python keywords (i.e. `import`, `from`, `as`). Notable exceptions apply in `__init__.py` files, where sometimes this rule will trigger a circular import.
-* We prefer single-quoted strings (`'foo'`) over double-quoted strings (`"foo"`), unless there is a compelling escape or formatting reason for using single quotes (e.g. a single quote appears inside the string).
-* Add convenience imports in `__init__.py` of a package for shallow first-level repetitive imports, but not for subpackages, even if that subpackage is defined in a single `.py` file. For instance, if an import line reads `from garage.foo.bar import Bar` then you should add `from garage.foo.bar import Bar` to `garage/foo/__init__.py` so that users may instead write `from garage.foo import Bar`. However, if an import line reads `from garage.foo.bar.stuff import Baz`, *do not* add `from garage.foo.bar.stuff import Baz` to `garage/foo/__init__.py`, because that obscures the `stuff` subpackage.
+* Python package imports should be sorted alphabetically within their PEP8 groupings.
+
+    The sorting is alphabetical from left to right, ignoring case and Python keywords (i.e. `import`, `from`, `as`). Notable exceptions apply in `__init__.py` files, where sometimes this rule will trigger a circular import.
+
+* Prefer single-quoted strings (`'foo'`) over double-quoted strings (`"foo"`).
+
+    Double-quoted strings can be used if there is a compelling escape or formatting reason for using single quotes (e.g. a single quote appears inside the string).
+
+* Add convenience imports in `__init__.py` of a package for shallow first-level repetitive imports, but not for subpackages, even if that subpackage is defined in a single `.py` file.
+
+    For instance, if an import line reads `from garage.foo.bar import Bar` then you should add `from garage.foo.bar import Bar` to `garage/foo/__init__.py` so that users may instead write `from garage.foo import Bar`. However, if an import line reads `from garage.foo.bar.stuff import Baz`, *do not* add `from garage.foo.bar.stuff import Baz` to `garage/foo/__init__.py`, because that obscures the `stuff` subpackage.
+
+    *Do*
+
+    `garage/foo/__init__.py`:
+    ```python
+    """Foo package."""
+    from garage.foo.bar import Bar
+    ```
+    `garage/barp/bux.py`:
+    ```python
+    """Bux tools for barps."""
+    from garage.foo import Bar
+    from garage.foo.stuff import Baz
+    ```
+
+    *Don't*
+
+    `garage/foo/__init__.py`:
+    ```python
+    """Foo package."""
+    from garage.foo.bar import Bar
+    from garage.foo.bar.stuff import Baz
+    ```
+    `garage/barp/bux.py`:
+    ```python
+    """Bux tools for barps."""
+    from garage.foo import Bar
+    from garage.foo import Baz
+    ```
+
+* Base and interface classes (i.e. classes which are not intended to ever be instantiated) should use the `abc` package to declare themselves as abstract.
+
+   i.e. your class should inherit from `abc.ABC` or use the metaclass `abc.ABCMeta`, it should declare its methods abstract (e.g. using `@abc.abstractmethod`) as-appropriate. Abstract methods should all use `pass` as their implementation, not `raise NotImplementedError`
+
+   *Do*
+   ```python
+   import abc
+
+   class Robot(abc.ABC):
+       """Interface for robots."""
+
+       @abc.abstractmethod
+       def beep(self):
+           pass
+    ```
+
+    *Don't*
+    ```python
+
+    class Robot(object):
+        "Base class for robots."""
+
+        def beep(self):
+            raise NotImplementedError
+    ```
+
+* When using external dependencies, use the `import` statement only to import whole modules, not individual classes or functions.
+
+    This applies to both packages from the standard library and 3rd-party dependencies. If a package has a long or cumbersome full path, or is used very frequently (e.g. `numpy`, `tensorflow`), you may use the keyword `as` to create a file-specific name which makes sense.
+
+    *Do*
+    ```python
+    import collections
+
+    import gym.spaces
+    import tensorflow as tf
+
+    from garage.tf.models import MLPModel
+
+    q = collections.deque(10)
+    d = gym.spaces.Discrete(5)
+
+    for _ in range(100):
+        q.append(d.sample())
+
+    m = MLPModel(output_dim=2)
+    ph = tf.placeholder(tf.float32, shape=(None, 5))
+    output = m.build(ph)
+    ```
+
+    *Don't*
+    ```python
+    from collections import deque
+
+    from gym.spaces import Discrete
+    import tensorflow as tf
+
+    from garage.tf.models import MLPModel
+
+    q = deque(10)
+    d = Discrete(5)
+
+    for _ in range(100):
+        q.append(d.sample())
+
+    m = MLPModel(output_dim=2)
+    ph = tf.placeholder(tf.float32, shape=(None, 5))
+    output = m.build(ph)
+    ```
 
 ## Documentation
 Python files should provide docstrings for all public methods which follow [PEP257](https://www.python.org/dev/peps/pep-0257/) docstring conventions and [Google](http://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) docstring formatting. A good docstring example can be found [here](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).
