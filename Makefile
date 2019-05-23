@@ -10,7 +10,7 @@ DATA_PATH ?= $(shell pwd)/data
 MJKEY_PATH ?= ~/.mujoco/mjkey.txt
 
 test:  ## Run the CI test suite
-test: RUN_CMD = nose2 -c setup.cfg -E 'not cron_job and not huge and not flaky'
+test: RUN_CMD = coverage run -m nose2 -c setup.cfg -v --with-id -E 'not cron_job and not huge and not flaky' --timer
 test: run-headless
 	@echo "Running test suite..."
 

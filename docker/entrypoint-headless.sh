@@ -41,4 +41,5 @@ export MUJOCO_GL="glfw"
 export TF_CPP_MIN_LOG_LEVEL=3      # shut TensorFlow up
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${HOME}/.mujoco/mjpro150/bin"
 
+pip install nose2-timer
 exec "$@"
